@@ -13,13 +13,13 @@
   },
   "ni_daq": {
     "enabled": true,
-    "simulation_mode": true,
+    "simulation_mode": false,
     "device": "Dev1",
     "channels": ["ao0", "ao1"],
     "rate": 400,
     "min_val": -10.0,
     "max_val": 10.0,
-    "samps_per_chan": 4500
+    "samps_per_chan": 800
   },
   "nodes": [
     {

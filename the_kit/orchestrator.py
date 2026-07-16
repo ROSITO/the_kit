@@ -49,10 +49,12 @@ class Orchestrator:
         from the_kit.io import nidaqmx_io
 
         ni_cfg = protocol.raw.get("ni_daq")
-        nidaqmx_io.init_from_config(
+        ni_ok, ni_msg = nidaqmx_io.init_from_config(
             ni_cfg if isinstance(ni_cfg, dict) else None,
             dry_run=dry_run,
         )
+        if ni_cfg and isinstance(ni_cfg, dict) and ni_cfg.get("enabled", True):
+            print(f"NI-DAQ init: ok={ni_ok} msg={ni_msg}")
         self.session = SessionLogger(
             protocol,
             self.session_dir,

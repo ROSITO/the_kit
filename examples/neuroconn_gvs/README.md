@@ -35,7 +35,19 @@ uv pip install pylsl
 uv run python -m the_kit run -p examples/neuroconn_gvs/protocol_dryrun.json -s DRYRUN --dry-run
 ```
 
-Sur poste labo : `"simulation_mode": false` dans `ni_daq`, LabRecorder ouvert sur le stream **`Trigger`**.
+Sur poste labo : `"simulation_mode": false` (déjà le cas dans `protocol.json`).
+**Sans ça, ou avec `--dry-run`, aucune tension n’est envoyée sur la carte NI.**
+
+Au démarrage tu dois voir :
+```text
+NI-DAQ : connecté — Dev1/ao0, Dev1/ao1 @ 400.0 Hz
+```
+ou clairement `SIMULATION` / `ÉCHEC connexion`.
+
+Pendant chaque essai :
+```text
+NI write ramp_AP: N=4000 dur=10.00s amp≈1.200V → carte
+```
 
 ## Paramètres réglables
 
