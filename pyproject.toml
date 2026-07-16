@@ -26,7 +26,12 @@ dev = ["pytest>=7.0", "jsonschema>=4.0"]
 
 [tool.uv]
 default-groups = ["dev"]
-environments = ["sys_platform == 'darwin'"]
+# macOS + Windows labo + Linux CI
+environments = [
+    "sys_platform == 'darwin'",
+    "sys_platform == 'win32'",
+    "sys_platform == 'linux'",
+]
 
 [project.scripts]
 the_kit = "the_kit.cli:main"
