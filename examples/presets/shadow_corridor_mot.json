@@ -1,0 +1,29 @@
+{
+  "protocol_version": "1.0",
+  "name": "shadow_corridor_mot",
+  "loop": 1,
+  "nodes": [
+    {
+      "id": "shadow_mot",
+      "type": "pygame_scene",
+      "engine": "pygame",
+      "params": {
+        "background": "shadow_corridor",
+        "background_params": {
+          "room_depth": 2.2
+        },
+        "duration_s": 15,
+        "stimuli": [
+          {
+            "type": "mot",
+            "num_balls": 8,
+            "duration_s": 15,
+            "keyhole": true,
+            "keyhole_radius": 120,
+            "uniform_speed": 3.0
+          }
+        ]
+      }
+    }
+  ]
+}

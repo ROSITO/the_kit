@@ -1,0 +1,32 @@
+{
+  "protocol_version": "1.0",
+  "name": "preset_video_qcm",
+  "loop": 1,
+  "nodes": [
+    {
+      "id": "intro",
+      "type": "instructions",
+      "engine": "qt",
+      "params": {
+        "text": "Vidéo puis questionnaire. Touche T pour continuer entre les blocs.",
+        "duration_s": 8
+      }
+    },
+    {
+      "id": "video_1",
+      "type": "video",
+      "engine": "qt",
+      "params": { "file": "video/exemple.mp4", "duration_s": 30 }
+    },
+    {
+      "id": "qcm_1",
+      "type": "questionnaire",
+      "engine": "qt",
+      "params": {
+        "question1": "Intensité",
+        "question2": "Agréabilité",
+        "echelle": ["Pas du tout", "2", "3", "4", "5", "Beaucoup"]
+      }
+    }
+  ]
+}

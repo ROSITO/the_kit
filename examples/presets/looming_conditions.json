@@ -1,0 +1,27 @@
+{
+  "protocol_version": "1.0",
+  "name": "preset_looming_conditions",
+  "loop": 1,
+  "presentation": { "randomize_trials": true, "random_seed": 42 },
+  "timing": { "iti_jitter_s": [0.3, 0.8] },
+  "defaults": { "stimulus_duration_s": 2.0, "condition_repetitions": 1 },
+  "instructions": {
+    "text": "Essais A/V looming / receding (low-latency). Placez les médias dans assets/."
+  },
+  "conditions": [
+    {
+      "id": "forward_loom",
+      "label": "forward + looming",
+      "video": "assets/forward.mp4",
+      "audio": "assets/Looming.wav",
+      "repetitions": 1
+    },
+    {
+      "id": "forward_recede",
+      "label": "forward + receding",
+      "video": "assets/forward.mp4",
+      "audio": "assets/Receding.wav",
+      "repetitions": 1
+    }
+  ]
+}

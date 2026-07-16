@@ -1,0 +1,20 @@
+{
+  "protocol_version": "1.0",
+  "name": "preset_shadow_ball",
+  "loop": 1,
+  "nodes": [
+    {
+      "id": "shadow_01",
+      "type": "shadow_ball",
+      "engine": "pygame",
+      "params": {
+        "shadow_mode": "congruent",
+        "fixation_duration_s": 3.0,
+        "ball_traverse_time_s": 1.0,
+        "run_baseline_pair": true,
+        "room_depth": 2.2,
+        "center_crossings": 2
+      }
+    }
+  ]
+}

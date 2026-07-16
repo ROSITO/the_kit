@@ -1,0 +1,51 @@
+{
+  "protocol_version": "1.0",
+  "name": "demo_phase3",
+  "loop": 1,
+  "lsl": {
+    "enabled": true,
+    "stream_name": "TheKit_Markers",
+    "stream_type": "Markers",
+    "channel_count": 1,
+    "channel_format": "float32",
+    "source_id": "the_kit_demo"
+  },
+  "nodes": [
+    {
+      "id": "intro",
+      "type": "instructions",
+      "engine": "qt",
+      "params": { "text": "Démo Phase 3 — occultation + shadow_ball + MOT", "duration_s": 3 }
+    },
+    {
+      "id": "occ",
+      "type": "occultation",
+      "engine": "pygame",
+      "params": {
+        "occultation_time": 1.2,
+        "ball_speed": 120,
+        "total_movement_time": 2.0,
+        "circle_option": 0,
+        "max_duration_s": 8
+      }
+    },
+    {
+      "id": "shadow",
+      "type": "shadow_ball",
+      "engine": "pygame",
+      "params": {
+        "shadow_mode": "congruent",
+        "fixation_duration_s": 3.0,
+        "ball_traverse_time_s": 1.0,
+        "run_baseline_pair": true,
+        "room_depth": 2.2
+      }
+    },
+    {
+      "id": "mot_demo",
+      "type": "mot",
+      "engine": "pygame",
+      "params": { "num_balls": 6, "duration_s": 5, "keyhole_radius": 100 }
+    }
+  ]
+}

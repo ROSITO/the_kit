@@ -1,0 +1,6 @@
+# Dev — géré par uv ([dependency-groups] dev, activé par défaut)
+# Équivalent : uv sync --extra qt
+
+-r requirements-qt.txt
+pytest>=7.0
+jsonschema>=4.0

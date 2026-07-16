@@ -1,0 +1,15 @@
+{
+  "protocol_version": "1.0",
+  "name": "latin_square_demo",
+  "subject": { "number": 0 },
+  "presentation": {
+    "counterbalance": "latin_square",
+    "randomize_trials": false
+  },
+  "conditions": [
+    { "id": "cond_A", "type": "instructions", "engine": "qt", "params": { "text": "Condition A", "duration_s": 1 } },
+    { "id": "cond_B", "type": "instructions", "engine": "qt", "params": { "text": "Condition B", "duration_s": 1 } },
+    { "id": "cond_C", "type": "instructions", "engine": "qt", "params": { "text": "Condition C", "duration_s": 1 } },
+    { "id": "cond_D", "type": "instructions", "engine": "qt", "params": { "text": "Condition D", "duration_s": 1 } }
+  ]
+}

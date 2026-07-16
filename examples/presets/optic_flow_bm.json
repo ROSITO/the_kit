@@ -1,0 +1,28 @@
+{
+  "protocol_version": "1.0",
+  "name": "preset_optic_flow",
+  "loop": 1,
+  "nodes": [
+    {
+      "id": "consignes",
+      "type": "instructions",
+      "engine": "qt",
+      "params": {
+        "text": "Flux optique : B = bruit, M = mouvement cohérent",
+        "duration_s": 5
+      }
+    },
+    {
+      "id": "flow",
+      "type": "optic_flow",
+      "engine": "pygame",
+      "params": {
+        "dot_number": 200,
+        "dot_coherence": 0.8,
+        "duration_s": 8,
+        "key_noise": "b",
+        "key_motion": "m"
+      }
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "protocol_version": "1.0",
+  "name": "neuroconn_gvs_dryrun",
+  "loop": 1,
+  "lsl": {
+    "enabled": true,
+    "stream_name": "Trigger",
+    "stream_type": "Markers",
+    "channel_count": 1,
+    "channel_format": "int32",
+    "source_id": "the_kit_gvs_dryrun",
+    "auto_markers": false
+  },
+  "ni_daq": {
+    "enabled": true,
+    "simulation_mode": true,
+    "device": "Dev1",
+    "channels": ["ao0", "ao1"],
+    "rate": 400
+  },
+  "nodes": [
+    {
+      "id": "consignes",
+      "type": "instructions",
+      "engine": "qt",
+      "params": {
+        "text": "Dry-run GVS — 10 essais (2×5). Flèches clavier/manette.",
+        "duration_s": 2,
+        "key": "space"
+      }
+    },
+    {
+      "id": "gvs_block",
+      "type": "neuroconn_gvs",
+      "engine": "pygame",
+      "params": {
+        "amplitude": 1.2,
+        "repetitions_per_condition": 2,
+        "rise_s": 3.0,
+        "plateau_s": 4.0,
+        "fall_s": 3.0,
+        "iti_base_s": 1.0,
+        "iti_jitter_s": [0.0, 0.5],
+        "random_seed": 99
+      }
+    }
+  ]
+}

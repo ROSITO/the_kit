@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://the-kit.local/schemas/protocol-v1.schema.json",
+  "title": "The Kit Protocol v1.0",
+  "type": "object",
+  "required": ["nodes"],
+  "properties": {
+    "protocol_version": { "type": "string" },
+    "name": { "type": "string" },
+    "loop": { "type": "integer", "minimum": 1 },
+    "audio_defaults": { "type": "object" },
+    "lsl": { "type": "object" },
+    "ni_daq": { "type": "object" },
+    "display": { "type": "object" },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/node" }
+    }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "required": ["type", "engine"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": {
+          "enum": [
+            "video",
+            "questionnaire",
+            "trigger",
+            "wait_key",
+            "delay",
+            "instructions",
+            "blank",
+            "av_sync",
+            "audio",
+            "keyboard_response",
+            "optic_flow",
+            "fixation",
+            "shapes",
+            "python_task",
+            "shadow_ball",
+            "occultation",
+            "occultation_ttc",
+            "mot",
+            "psychopy_stim",
+            "photosonde_square",
+            "consent",
+            "debrief",
+            "slideshow",
+            "block_break",
+            "pygame_scene",
+            "ni_stim"
+          ]
+        },
+        "engine": { "enum": ["qt", "pygame", "psychopy", "python"] },
+        "timing_mode": { "enum": ["standard", "low_latency"] },
+        "params": { "type": "object" }
+      },
+      "additionalProperties": true
+    }
+  }
+}

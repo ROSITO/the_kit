@@ -1,0 +1,5 @@
+# Profil Qt — géré par uv / pyproject.toml ([project.optional-dependencies] qt)
+# Équivalent : uv sync --extra qt
+
+PyQt6>=6.5
+pyserial>=3.5

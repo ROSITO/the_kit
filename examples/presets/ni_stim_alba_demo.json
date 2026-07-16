@@ -1,0 +1,47 @@
+{
+  "protocol_version": "1.0",
+  "name": "ni_stim_alba_demo",
+  "loop": 1,
+  "ni_daq": {
+    "enabled": true,
+    "simulation_mode": true,
+    "device": "Dev1",
+    "channels": ["ao0", "ao1"],
+    "rate": 400,
+    "min_val": -10.0,
+    "max_val": 10.0
+  },
+  "nodes": [
+    {
+      "id": "intro",
+      "type": "instructions",
+      "engine": "qt",
+      "params": {
+        "text": "Démo stimulation NI (onde carrée Alba) — simulation si pas de carte",
+        "duration_s": 2
+      }
+    },
+    {
+      "id": "stim_ap",
+      "type": "ni_stim",
+      "engine": "python",
+      "params": {
+        "direction": "AP",
+        "amplitude": 0.8,
+        "frequency": 0.278,
+        "duration_s": 0.5
+      }
+    },
+    {
+      "id": "stim_pa",
+      "type": "ni_stim",
+      "engine": "python",
+      "params": {
+        "direction": "PA",
+        "amplitude": 1.2,
+        "frequency": 0.278,
+        "duration_s": 0.5
+      }
+    }
+  ]
+}

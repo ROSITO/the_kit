@@ -1,0 +1,58 @@
+{
+  "protocol_version": "1.0",
+  "name": "demo_multi_engine",
+  "loop": 1,
+  "audio_defaults": {
+    "timing_mode": "low_latency",
+    "blocksize": 128,
+    "scheduling_lead_s": 0.3,
+    "offset_ms": 0
+  },
+  "nodes": [
+    {
+      "id": "welcome",
+      "type": "instructions",
+      "engine": "qt",
+      "params": {
+        "text": "The Kit — démo multi-moteur (Phase 1)\n\nQt → Python → PsychoPy → Pygame",
+        "duration_s": 4
+      }
+    },
+    {
+      "id": "setup_py",
+      "type": "python_task",
+      "engine": "python",
+      "params": {
+        "script": { "file": "scripts/hello.py", "prepare": "prepare", "run": "run" }
+      }
+    },
+    {
+      "id": "fixation",
+      "type": "instructions",
+      "engine": "qt",
+      "params": { "text": "+", "duration_s": 1.5 }
+    },
+    {
+      "id": "flow",
+      "type": "optic_flow",
+      "engine": "pygame",
+      "params": {
+        "dot_number": 120,
+        "dot_coherence": 0.75,
+        "duration_s": 4,
+        "key_noise": "b",
+        "key_motion": "m"
+      }
+    },
+    {
+      "id": "keys",
+      "type": "keyboard_response",
+      "engine": "pygame",
+      "params": {
+        "duration_s": 3,
+        "prompt": "Touche B ou M puis fin",
+        "keys": ["b", "m"]
+      }
+    }
+  ]
+}

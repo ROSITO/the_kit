@@ -1,0 +1,32 @@
+{
+  "protocol_version": "1.0",
+  "name": "minimal_demo",
+  "loop": 1,
+  "nodes": [
+    {
+      "id": "instr_wait",
+      "type": "wait_key",
+      "engine": "qt",
+      "params": {
+        "key": "t",
+        "message": "Appuyez sur 't' pour démarrer la démo (Phase 0 The Kit)"
+      }
+    },
+    {
+      "id": "delay_1",
+      "type": "delay",
+      "engine": "qt",
+      "params": { "duration_s": 1 }
+    },
+    {
+      "id": "qcm_demo",
+      "type": "questionnaire",
+      "engine": "qt",
+      "params": {
+        "question1": "Exemple — intensité perçue",
+        "question2": "Exemple — agréabilité",
+        "echelle": ["Pas du tout", "2", "3", "4", "5", "Beaucoup"]
+      }
+    }
+  ]
+}
