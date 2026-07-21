@@ -184,7 +184,7 @@ def run_neuroconn_gvs_node(
     import pygame
 
     from the_kit.io import gvs_lsl, nidaqmx_io
-    from the_kit.io.gamepad import direction_label, init_joystick, poll_direction
+    from the_kit.io.gamepad import direction_label, poll_direction
 
     p = node.params
     amplitude = float(p.get("amplitude", 1.2))
@@ -213,9 +213,10 @@ def run_neuroconn_gvs_node(
         )
 
     from the_kit.audio.playback import audio_config_from_session, resolve_audio_backend
-    from the_kit.io.gamepad import joystick_status
+    from the_kit.io.gamepad import init_gamepad, joystick_status
 
-    init_joystick()
+    gamepad_pref = str(p.get("gamepad_backend", "auto"))
+    init_gamepad(preference=gamepad_pref)
     pad_status = joystick_status()
 
     session.log_event(

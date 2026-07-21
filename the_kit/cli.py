@@ -141,6 +141,12 @@ def cmd_check_lsl(_args: argparse.Namespace) -> int:
     return 0 if ok else 1
 
 
+def cmd_check_gamepad(args: argparse.Namespace) -> int:
+    from the_kit.io.gamepad.diagnostic import run_gamepad_check
+
+    return run_gamepad_check(duration_s=float(args.duration))
+
+
 def cmd_check_ni(_args: argparse.Namespace) -> int:
     from the_kit.io import nidaqmx_io
 
@@ -280,6 +286,15 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_lsl = sub.add_parser("check-lsl", help="Tester stream LSL marqueurs")
     p_lsl.set_defaults(func=cmd_check_lsl)
+
+    p_gp = sub.add_parser("check-gamepad", help="Diagnostic manette / Joy-Con")
+    p_gp.add_argument(
+        "--duration",
+        type=float,
+        default=30.0,
+        help="Durée du test interactif (secondes)",
+    )
+    p_gp.set_defaults(func=cmd_check_gamepad)
 
     p_ni = sub.add_parser("check-ni", help="Tester module NI-DAQ (simulation)")
     p_ni.set_defaults(func=cmd_check_ni)

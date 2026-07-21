@@ -19,6 +19,7 @@ pygame = ["pygame>=2.6"]
 # uv pip install 'psychopy==2023.2.3' moviepy
 lowlatency = ["sounddevice>=0.4.6", "soundfile>=0.12"]
 ni = ["nidaqmx>=1.4.0"]
+gamepad = ["joycon-python>=0.2.4", "hidapi>=0.10", "pyglm"]
 dev = ["pytest>=7.0", "jsonschema>=4.0"]
 
 [dependency-groups]

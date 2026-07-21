@@ -31,8 +31,40 @@ Ce dossier contient le protocole complet (`protocol.json`), une version courte p
 | **NeuroConn** | Réception ±10 V, calibration courant côté appareil |
 | **fNIRS** | LabRecorder (ou équivalent) abonné au stream LSL **`Trigger`** |
 | **Écran** | Fixation centrale (pygame plein écran ou fenêtré selon config OS) |
-| **Entrées** | Clavier flèches **ou** Joy-Con / Switch (croix en boutons) |
+| **Entrées** | Clavier flèches **ou** Joy-Con / Switch |
 | **Audio** | Haut-parleurs pour consignes MP3 |
+
+### Manette Joy-Con
+
+The Kit utilise une **chaîne de backends** (pas un mapping bouton artisanal) :
+
+1. **SDL GameController** — API standard (`d-pad` sémantique) — recommandé
+2. **pygame joystick** — repli indices boutons
+3. **pyjoycon** (optionnel) — accès HID direct Nintendo
+
+Installation driver Joy-Con (si SDL ne suffit pas) :
+
+```bash
+uv sync --extra pygame --extra gamepad
+# ou conda :
+pip install -e ".[pygame,gamepad]"
+```
+
+**Diagnostic obligatoire** avant une session :
+
+```bash
+python -m the_kit check-gamepad
+```
+
+Appuyez sur la croix : le terminal doit afficher `→ AP`, `→ PA`, etc.
+
+Dans `protocol.json` :
+
+```json
+"gamepad_backend": "auto"
+```
+
+Valeurs : `auto` | `sdl` | `pygame` | `pyjoycon` | `joycon`
 
 ---
 

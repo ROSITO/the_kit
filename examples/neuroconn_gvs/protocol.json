@@ -52,6 +52,7 @@
         "iti_base_s": 10.0,
         "iti_jitter_s": [1.0, 5.0],
         "random_seed": 42,
+        "gamepad_backend": "auto",
         "sounds": {
           "debut_dexpe": "debut_dexpe.mp3",
           "vous_pouvez_repondre": "vous_pouvez_repondre.mp3",

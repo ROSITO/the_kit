@@ -10,6 +10,13 @@ def test_launch_command_registered():
     assert callable(args.func)
 
 
+def test_check_gamepad_command_registered():
+    parser = build_parser()
+    args = parser.parse_args(["check-gamepad", "--duration", "5"])
+    assert args.command == "check-gamepad"
+    assert args.duration == 5.0
+
+
 def test_launcher_module_import():
     from the_kit.launcher import run_launcher
     from the_kit.launcher.app import _python_executable
