@@ -212,6 +212,12 @@ def run_neuroconn_gvs_node(
             payload={"aborted": True, "trial": trial_i},
         )
 
+    from the_kit.audio.playback import audio_config_from_session, resolve_audio_backend
+    from the_kit.io.gamepad import joystick_status
+
+    init_joystick()
+    pad_status = joystick_status()
+
     session.log_event(
         "node_start",
         node_id=node.node_id,
@@ -224,17 +230,15 @@ def run_neuroconn_gvs_node(
             "baseline_s": baseline_s,
             "response_window_s": response_window_s,
             "conditions": list(GVS_CONDITIONS),
+            "gamepad": pad_status,
         },
     )
     gvs_lsl.push(gvs_lsl.GVS_BLOCK_START, label="gvs_block_start")
-
-    from the_kit.audio.playback import audio_config_from_session, resolve_audio_backend
 
     audio_cfg = audio_config_from_session(session, node)
     if p.get("audio"):
         audio_cfg = {**audio_cfg, **p["audio"]}
 
-    init_joystick()
     font = pygame.font.SysFont(None, 28)
     w, h = screen.get_size()
 

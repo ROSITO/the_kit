@@ -453,3 +453,10 @@ class QtEngine(EngineBase):
             except Exception:
                 pass
             QtEngine._window = None
+        if QtEngine._app is not None:
+            try:
+                QtEngine._app.quit()
+                QtEngine._app.processEvents()
+            except Exception:
+                pass
+            QtEngine._app = None

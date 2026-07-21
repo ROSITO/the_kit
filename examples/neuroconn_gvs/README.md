@@ -31,7 +31,7 @@ Ce dossier contient le protocole complet (`protocol.json`), une version courte p
 | **NeuroConn** | Réception ±10 V, calibration courant côté appareil |
 | **fNIRS** | LabRecorder (ou équivalent) abonné au stream LSL **`Trigger`** |
 | **Écran** | Fixation centrale (pygame plein écran ou fenêtré selon config OS) |
-| **Entrées** | Clavier flèches **ou** manette Switch (hat D-pad) |
+| **Entrées** | Clavier flèches **ou** Joy-Con / Switch (croix en boutons) |
 | **Audio** | Haut-parleurs pour consignes MP3 |
 
 ---

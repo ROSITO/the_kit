@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -10,6 +11,28 @@ from the_kit.protocol.validator import ProtocolValidationError, validate_protoco
 
 def _project_root() -> Path:
     return Path(__file__).resolve().parents[2]
+
+
+def _python_executable() -> str:
+    """Évite pythonw.exe sous Windows (pas de fenêtre SDL pour pygame)."""
+    exe = sys.executable
+    if sys.platform == "win32" and exe.lower().endswith("pythonw.exe"):
+        candidate = Path(exe).with_name("python.exe")
+        if candidate.is_file():
+            return str(candidate)
+    return exe
+
+
+def _subprocess_environment():
+    from PyQt6.QtCore import QProcessEnvironment
+
+    env = QProcessEnvironment.systemEnvironment()
+    for key, value in os.environ.items():
+        env.insert(key, value)
+    env.insert("PYTHONUNBUFFERED", "1")
+    if sys.platform == "win32":
+        env.insert("SDL_VIDEODRIVER", "windows")
+    return env
 
 
 def run_launcher() -> int:
@@ -187,12 +210,12 @@ def run_launcher() -> int:
             subject = self.subject_edit.text().strip() or "anonymous"
 
             args = [
-                sys.executable,
+                _python_executable(),
                 "-m",
                 "the_kit",
                 "run",
                 "-p",
-                path,
+                str(Path(path).resolve()),
                 "-s",
                 subject,
             ]
@@ -209,6 +232,7 @@ def run_launcher() -> int:
 
             proc = QProcess(self)
             proc.setWorkingDirectory(str(self._root))
+            proc.setProcessEnvironment(_subprocess_environment())
             proc.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
             proc.readyReadStandardOutput.connect(self._read_process_output)
             proc.finished.connect(self._on_process_finished)
@@ -225,6 +249,13 @@ def run_launcher() -> int:
 
         def _on_process_finished(self, exit_code: int, _status) -> None:
             self._append_log(f"\n--- Terminé (code {exit_code}) ---\n")
+            if exit_code != 0:
+                QMessageBox.warning(
+                    self,
+                    "Session interrompue",
+                    f"Le processus s'est terminé avec le code {exit_code}.\n"
+                    "Consultez le journal ci-dessous (souvent Qt → pygame ou environnement).",
+                )
             self._process = None
             self._set_running(False)
 

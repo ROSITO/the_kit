@@ -20,22 +20,22 @@ class DisplayManager:
         self._cleanup_callbacks.append(callback)
 
     def handoff(self, from_engine: str | None, to_engine: str) -> None:
-        if from_engine is None:
-            self._last_engine = to_engine
-            return
-        if from_engine == to_engine:
-            return
-        self.session.log_event(
-            "engine_handoff",
-            payload={"from": from_engine, "to": to_engine},
-        )
-        time.sleep(self.blank_ms / 1000.0)
+        if from_engine is not None and from_engine != to_engine:
+            self.session.log_event(
+                "engine_handoff",
+                payload={"from": from_engine, "to": to_engine},
+            )
+            self._run_cleanups()
+            time.sleep(self.blank_ms / 1000.0)
         self._last_engine = to_engine
 
-    def shutdown_all(self) -> None:
+    def _run_cleanups(self) -> None:
         for cb in self._cleanup_callbacks:
             try:
                 cb()
             except Exception as exc:
                 self.session.log_event("error", payload={"handoff_cleanup": str(exc)})
         self._cleanup_callbacks.clear()
+
+    def shutdown_all(self) -> None:
+        self._run_cleanups()

@@ -33,7 +33,23 @@ class PygameEngine(EngineBase):
         *,
         dry_run: bool = False,
     ) -> None:
+        import os
+        import sys
+
         import pygame
+
+        if sys.platform == "win32":
+            os.environ.setdefault("SDL_VIDEODRIVER", "windows")
+
+        try:
+            from PyQt6.QtWidgets import QApplication
+
+            qt_app = QApplication.instance()
+            if qt_app is not None:
+                qt_app.quit()
+                qt_app.processEvents()
+        except ImportError:
+            pass
 
         if not pygame.get_init():
             pygame.init()
