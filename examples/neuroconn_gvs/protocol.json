@@ -27,7 +27,7 @@
       "type": "instructions",
       "engine": "qt",
       "params": {
-        "text": "GVS NeuroConn + fNIRS\n\nIndiquez la direction perçue avec les flèches (↑ avant, ↓ arrière, ← gauche, → droite).\nManette Switch ou clavier.",
+        "text": "GVS NeuroConn + fNIRS\n\nAprès chaque stimulation, un son vous invitera à répondre.\nIndiquez la direction perçue avec les flèches (↑ avant, ↓ arrière, ← gauche, → droite).\nVous avez 5 s pour répondre ; vous pouvez aussi ne pas répondre.\nManette Switch ou clavier.",
         "duration_s": 8,
         "key": "space"
       }
@@ -42,9 +42,17 @@
         "rise_s": 3.0,
         "plateau_s": 4.0,
         "fall_s": 3.0,
+        "baseline_s": 60.0,
+        "response_window_s": 5.0,
         "iti_base_s": 10.0,
         "iti_jitter_s": [1.0, 5.0],
-        "random_seed": 42
+        "random_seed": 42,
+        "sounds": {
+          "debut_dexpe": "debut_dexpe.mp3",
+          "vous_pouvez_repondre": "vous_pouvez_repondre.mp3",
+          "votre_reponse": "Votre_reponse.mp3",
+          "fin_du_temps": "fin_du_temps.mp3"
+        }
       }
     }
   ]

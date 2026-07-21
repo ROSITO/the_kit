@@ -50,6 +50,14 @@ def stim_onset(condition: str) -> None:
     push(code, label=f"stim_onset_{condition}")
 
 
+def baseline_start() -> None:
+    push(GVS_BASELINE, label="baseline_start")
+
+
+def baseline_end() -> None:
+    push(GVS_BASELINE, label="baseline_end")
+
+
 def stim_offset(condition: str) -> None:
     """Fin stim — même code condition (comme NIRS_Test)."""
     code = GVS_CONDITION_CODES.get(condition.upper(), GVS_BASELINE)

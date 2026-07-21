@@ -38,6 +38,15 @@ uv run python -m the_kit run \
   --dry-run
 ```
 
+### Lanceur graphique (technicien)
+
+```bash
+uv run python -m the_kit launch
+```
+
+Fenêtre Qt : choix du `protocol.json`, ID participant, options (dry-run, vérifier médias), bouton **Lancer**.  
+Sur macOS : double-clic `scripts/launch_the_kit.command`.
+
 | Option | Description |
 |--------|-------------|
 | `-p` / `--protocol` | Fichier JSON (v1 ou Arôme v0, migré automatiquement) |

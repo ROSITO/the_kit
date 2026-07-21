@@ -181,6 +181,12 @@ def cmd_export_session(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_launch(_args: argparse.Namespace) -> int:
+    from the_kit.launcher.app import run_launcher
+
+    return run_launcher() or 0
+
+
 def cmd_design(args: argparse.Namespace) -> int:
     from the_kit.designer.app import run_designer
 
@@ -264,6 +270,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_imp.add_argument("--output", "-o", required=True)
     p_imp.add_argument("--name", default=None)
     p_imp.set_defaults(func=cmd_import_p19)
+
+    p_launch = sub.add_parser("launch", help="Ouvrir le lanceur Qt (choix protocole + run)")
+    p_launch.set_defaults(func=cmd_launch)
 
     p_des = sub.add_parser("design", help="Ouvrir le concepteur Qt")
     p_des.add_argument("--protocol", "-p", default=None)
