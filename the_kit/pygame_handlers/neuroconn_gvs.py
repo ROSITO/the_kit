@@ -78,7 +78,7 @@ def _pump_events(screen, clock, *, allow_escape: bool = True) -> bool:
     return False
 
 
-def _play_mp3(
+def _play_cue(
     path: Path,
     screen,
     clock,
@@ -87,23 +87,18 @@ def _play_mp3(
     h: int,
     *,
     hint: str = "",
+    audio_cfg: dict[str, Any] | None = None,
 ) -> None:
-    import pygame
+    from the_kit.audio.playback import play_cue_file
 
-    if not path.is_file():
-        print(f"⚠ audio manquant : {path}")
-        return
-    if not pygame.mixer.get_init():
-        pygame.mixer.init()
-    pygame.mixer.music.load(str(path))
-    pygame.mixer.music.play()
-    while pygame.mixer.music.get_busy():
+    def _on_frame() -> bool:
         if _pump_events(screen, clock):
-            pygame.mixer.music.stop()
-            return
+            return True
         _draw_fixation(screen, font, w, h, hint=hint)
         clock.tick(60)
-    pygame.mixer.music.stop()
+        return False
+
+    play_cue_file(path, audio_cfg, on_frame=_on_frame)
 
 
 def _wait_seconds(
@@ -233,14 +228,28 @@ def run_neuroconn_gvs_node(
     )
     gvs_lsl.push(gvs_lsl.GVS_BLOCK_START, label="gvs_block_start")
 
+    from the_kit.audio.playback import audio_config_from_session, resolve_audio_backend
+
+    audio_cfg = audio_config_from_session(session, node)
+    if p.get("audio"):
+        audio_cfg = {**audio_cfg, **p["audio"]}
+
     init_joystick()
-    if not pygame.mixer.get_init():
-        pygame.mixer.init()
     font = pygame.font.SysFont(None, 28)
     w, h = screen.get_size()
 
+    audio_backend = resolve_audio_backend(audio_cfg)
+    session.log_event(
+        "gvs_audio_backend",
+        node_id=node.node_id,
+        node_type=node.type,
+        node_index=node.index,
+        engine=node.engine,
+        payload={"backend": audio_backend, "audio_cfg": {k: audio_cfg[k] for k in audio_cfg if k != "audio_device_query"}},
+    )
+
     # Début expérience : son + baseline 60 s (trigger 1 début/fin)
-    _play_mp3(
+    _play_cue(
         _audio_path(session, p, "debut_dexpe"),
         screen,
         clock,
@@ -248,6 +257,7 @@ def run_neuroconn_gvs_node(
         w,
         h,
         hint="Début expérience",
+        audio_cfg=audio_cfg,
     )
     if _run_baseline(session, node, duration_s=baseline_s, screen=screen, clock=clock, font=font, w=w, h=h):
         _abort()
@@ -305,7 +315,7 @@ def run_neuroconn_gvs_node(
         stim_duration_ms = int((time.perf_counter() - stim_t0) * 1000)
 
         # Consigne réponse puis fenêtre 5 s (décompte après le son)
-        _play_mp3(
+        _play_cue(
             _audio_path(session, p, "vous_pouvez_repondre"),
             screen,
             clock,
@@ -313,6 +323,7 @@ def run_neuroconn_gvs_node(
             w,
             h,
             hint="Vous pouvez répondre",
+            audio_cfg=audio_cfg,
         )
         response_t0 = time.perf_counter()
         response_dir: str | None = None
@@ -344,23 +355,25 @@ def run_neuroconn_gvs_node(
             clock.tick(60)
 
         if response_dir is not None:
-            _play_mp3(
+            _play_cue(
                 _audio_path(session, p, "votre_reponse"),
                 screen,
                 clock,
                 font,
                 w,
                 h,
+                audio_cfg=audio_cfg,
             )
             gvs_lsl.response_perceived(response_dir, correct=None if condition == "CONTROL" else response_dir == condition)
         else:
-            _play_mp3(
+            _play_cue(
                 _audio_path(session, p, "fin_du_temps"),
                 screen,
                 clock,
                 font,
                 w,
                 h,
+                audio_cfg=audio_cfg,
             )
 
         correct = None if condition == "CONTROL" else (response_dir == condition if response_dir else None)

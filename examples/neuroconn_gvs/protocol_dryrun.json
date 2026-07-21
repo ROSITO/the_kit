@@ -2,6 +2,11 @@
   "protocol_version": "1.0",
   "name": "neuroconn_gvs_dryrun",
   "loop": 1,
+  "audio_defaults": {
+    "timing_mode": "low_latency",
+    "backend": "auto",
+    "blocksize": 128
+  },
   "lsl": {
     "enabled": true,
     "stream_name": "Trigger",

@@ -73,6 +73,8 @@ pip install -e ".[qt,pygame,ni,lowlatency]"
 pip install pylsl
 ```
 
+**Audio Windows** : le profil `lowlatency` installe `sounddevice` → **WASAPI** (prioritaire). Les consignes MP3 du protocole GVS passent par PortAudio, pas `pygame.mixer`.
+
 **Prérequis Windows supplémentaires :**
 
 - Driver **NI-DAQmx** (National Instruments) — [ni.com/downloads](https://www.ni.com/en/support/downloads.html)
@@ -287,6 +289,47 @@ Chemins surchargeables dans le JSON :
 }
 ```
 
+### WASAPI (Windows) / Core Audio (macOS)
+
+Le protocole déclare :
+
+```json
+"audio_defaults": {
+  "timing_mode": "low_latency",
+  "backend": "auto",
+  "blocksize": 128
+}
+```
+
+| `backend` | Comportement |
+|-----------|--------------|
+| `auto` | PortAudio (WASAPI sous Windows) si `sounddevice` installé, sinon `pygame.mixer` |
+| `portaudio` | Force WASAPI / Core Audio |
+| `pygame` | Force `pygame.mixer` (repli) |
+
+Au démarrage du bloc GVS, le terminal affiche le backend utilisé :
+
+```text
+🔊 WASAPI — debut_dexpe.mp3 (2.12s)
+```
+
+Vérifier le périphérique :
+
+```bash
+python -m the_kit check-audio
+```
+
+Forcer un casque USB (ex.) via le protocole :
+
+```json
+"audio_defaults": {
+  "backend": "auto",
+  "audio_device_query": "usb"
+}
+```
+
+Ou index PortAudio explicite : `"audio_device_index": 12` (lister avec `python -m sounddevice`).
+
 ---
 
 ## Paramètres du protocole
@@ -334,7 +377,7 @@ Export optionnel : `python -m the_kit export-session -d sessions/...`
 |----------|----------------|--------|
 | `NI-DAQ : SIMULATION` en session réelle | `--dry-run` ou `simulation_mode: true` | Retirer `--dry-run`, mettre `simulation_mode: false` |
 | Pas de triggers LSL | `pylsl` absent ou LabRecorder non abonné | `pip install pylsl` ; vérifier stream `Trigger` |
-| Pas de son | MP3 absents ou mixer pygame | `--check-media` ; vérifier volume OS |
+| Pas de son | MP3 absents ou backend audio | `--check-media` ; `check-audio` ; vérifier `🔊 WASAPI` dans le terminal |
 | `Erreur : module 'pygame.event' has no attribute 'PUMP'` | Ancienne version | Mettre à jour le dépôt |
 | Essais très courts en dry-run | Normal | NI simulé (~50 ms) ; en labo la stim dure 10 s réelles |
 | Carte NI introuvable | Mauvais `device` ou driver | NI MAX → vérifier nom (`Dev1`) ; `check-ni` |
