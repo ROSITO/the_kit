@@ -1,4 +1,5 @@
 from the_kit.io.gamepad.backends import (
+    JOYCON_L_NIRS,
     JOYCON_L_SDL224,
     PygameJoystickBackend,
     SdlGameControllerBackend,
@@ -7,15 +8,15 @@ from the_kit.io.gamepad.backends import (
 
 def test_button_map_joycon_left():
     m = PygameJoystickBackend._button_map_for_name("Nintendo Switch Joy-Con (L)")
-    assert m[2] == "AP"
-    assert m[1] == "PA"
-    assert m[3] == "LATG"
-    assert m[0] == "LATD"
+    assert m[3] == "AP"
+    assert m[0] == "PA"
+    assert m[2] == "LATG"
+    assert m[1] == "LATD"
 
 
 def test_button_map_wireless_gamepad():
     m = PygameJoystickBackend._button_map_for_name("Wireless Gamepad")
-    assert m == JOYCON_L_SDL224
+    assert m == JOYCON_L_NIRS
 
 
 def test_direction_from_buttons():
@@ -28,8 +29,8 @@ def test_direction_from_buttons():
 
     backend = PygameJoystickBackend()
     backend._joy = FakeJoy()
-    backend._button_map = JOYCON_L_SDL224
-    assert backend._direction_from_buttons() == "AP"
+    backend._button_map = JOYCON_L_NIRS
+    assert backend._direction_from_buttons() == "LATG"
 
 
 def test_sdl_dpad_constants():

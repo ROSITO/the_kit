@@ -28,6 +28,10 @@ HAT_TO_DIRECTION: dict[tuple[int, int], str] = {
 
 KEY_TO_DIRECTION: dict[int, str] = {}
 
+# Profil terrain validé dans NIRS_experiment.py :
+#   bouton 3 -> avant, 0 -> arrière, 2 -> gauche, 1 -> droite
+JOYCON_L_NIRS: dict[int, str] = {3: "AP", 0: "PA", 2: "LATG", 1: "LATD"}
+# Profils SDL documentés (fallback)
 JOYCON_L_SDL224: dict[int, str] = {2: "AP", 1: "PA", 3: "LATG", 0: "LATD"}
 JOYCON_L_LEGACY: dict[int, str] = {0: "AP", 1: "PA", 2: "LATG", 3: "LATD"}
 JOYCON_PAIR_DPAD: dict[int, str] = {11: "AP", 12: "PA", 13: "LATG", 14: "LATD"}
@@ -239,9 +243,9 @@ class PygameJoystickBackend(GamepadBackend):
     def _button_map_for_name(name: str) -> dict[int, str]:
         lower = name.lower()
         if "joy-con" in lower and "(l)" in lower:
-            return dict(JOYCON_L_SDL224)
+            return dict(JOYCON_L_NIRS)
         if "joy-con" in lower or "wireless gamepad" in lower:
-            return dict(JOYCON_L_SDL224)
+            return dict(JOYCON_L_NIRS)
         if "switch" in lower or "pro controller" in lower:
             return dict(JOYCON_PAIR_DPAD)
         return {}

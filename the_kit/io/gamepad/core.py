@@ -21,10 +21,10 @@ def _backend_chain(preference: str) -> list[GamepadBackend]:
     chain: list[GamepadBackend] = []
     if pref in ("pyjoycon", "joycon", "hid"):
         chain.append(PyJoyConBackend())
-    if pref in ("auto", "sdl", "gamecontroller", "portaudio"):
-        chain.append(SdlGameControllerBackend())
     if pref in ("auto", "pygame", "joystick"):
         chain.append(PygameJoystickBackend())
+    if pref in ("auto", "sdl", "gamecontroller", "portaudio"):
+        chain.append(SdlGameControllerBackend())
     if pref == "auto":
         chain.append(PyJoyConBackend())
     return chain
