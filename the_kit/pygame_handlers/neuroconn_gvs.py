@@ -26,8 +26,40 @@ DEFAULT_SOUNDS = {
 }
 
 
-def _build_trial_list(reps: int, seed: int | None) -> list[str]:
-    trials = [c for c in GVS_CONDITIONS for _ in range(reps)]
+def _normalize_conditions(raw: Any) -> list[str]:
+    """Valide et normalise la liste de conditions du protocole."""
+    if raw is None:
+        return list(GVS_CONDITIONS)
+    if isinstance(raw, str):
+        items = [raw]
+    elif isinstance(raw, (list, tuple)):
+        items = list(raw)
+    else:
+        raise ValueError(f"conditions invalides (attendu liste) : {raw!r}")
+    if not items:
+        raise ValueError("conditions : liste vide")
+    out: list[str] = []
+    seen: set[str] = set()
+    for item in items:
+        name = str(item).strip().upper()
+        if name not in GVS_CONDITIONS:
+            raise ValueError(
+                f"condition inconnue {item!r} — autorisées : {', '.join(GVS_CONDITIONS)}"
+            )
+        if name not in seen:
+            out.append(name)
+            seen.add(name)
+    return out
+
+
+def _build_trial_list(
+    reps: int,
+    seed: int | None,
+    *,
+    conditions: list[str] | None = None,
+) -> list[str]:
+    conds = conditions if conditions is not None else list(GVS_CONDITIONS)
+    trials = [c for c in conds for _ in range(reps)]
     rng = random.Random(seed)
     rng.shuffle(trials)
     return trials
@@ -88,7 +120,12 @@ def _play_cue(
     *,
     hint: str = "",
     audio_cfg: dict[str, Any] | None = None,
+    skip: bool = False,
 ) -> None:
+    if skip:
+        _draw_fixation(screen, font, w, h, hint=hint or "cue")
+        clock.tick(60)
+        return
     from the_kit.audio.playback import play_cue_file
 
     def _on_frame() -> bool:
@@ -198,8 +235,11 @@ def run_neuroconn_gvs_node(
     response_window_s = float(p.get("response_window_s", 5.0))
     seed = p.get("random_seed")
     rng = random.Random(seed)
+    conditions = _normalize_conditions(p.get("conditions"))
+    auto_respond = bool(p.get("auto_respond", False))
+    skip_sounds = bool(p.get("skip_sounds", False)) or auto_respond
 
-    trials = _build_trial_list(reps, seed)
+    trials = _build_trial_list(reps, seed, conditions=conditions)
 
     def _abort(trial_i: int | None = None) -> None:
         gvs_lsl.push(gvs_lsl.GVS_BLOCK_END, label="aborted")
@@ -230,8 +270,11 @@ def run_neuroconn_gvs_node(
             "amplitude": amplitude,
             "baseline_s": baseline_s,
             "response_window_s": response_window_s,
-            "conditions": list(GVS_CONDITIONS),
+            "conditions": list(conditions),
+            "repetitions_per_condition": reps,
             "gamepad": pad_status,
+            "auto_respond": auto_respond,
+            "skip_sounds": skip_sounds,
         },
     )
     gvs_lsl.push(gvs_lsl.GVS_BLOCK_START, label="gvs_block_start")
@@ -263,6 +306,7 @@ def run_neuroconn_gvs_node(
         h,
         hint="Début expérience",
         audio_cfg=audio_cfg,
+        skip=skip_sounds,
     )
     if _run_baseline(session, node, duration_s=baseline_s, screen=screen, clock=clock, font=font, w=w, h=h):
         _abort()
@@ -329,35 +373,45 @@ def run_neuroconn_gvs_node(
             h,
             hint="Vous pouvez répondre",
             audio_cfg=audio_cfg,
+            skip=skip_sounds,
         )
         response_t0 = time.perf_counter()
         response_dir: str | None = None
         rt_ms: int | None = None
-        response_end = response_t0 + response_window_s
-        while time.perf_counter() < response_end:
-            events = pygame.event.get()
-            for event in events:
-                if event.type == pygame.QUIT:
-                    _abort(trial_i)
-                    return
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    _abort(trial_i)
-                    return
-            polled = poll_direction(events=events)
-            if polled is not None:
-                response_dir = polled
-                rt_ms = int((time.perf_counter() - response_t0) * 1000)
-                break
-            remaining = max(0.0, response_end - time.perf_counter())
-            _draw_fixation(
-                screen,
-                font,
-                w,
-                h,
-                title=f"Essai {trial_i + 1}/{len(trials)}",
-                hint=f"Flèches — {remaining:.1f} s restantes",
-            )
-            clock.tick(60)
+        if auto_respond:
+            # Simulation : réponse correcte (ou aléatoire pour CONTROL)
+            if condition == "CONTROL":
+                response_dir = rng.choice(["AP", "PA", "LATG", "LATD"])
+            else:
+                response_dir = condition
+            rt_ms = int(rng.uniform(250, 900))
+            time.sleep(min(0.05, response_window_s))
+        else:
+            response_end = response_t0 + response_window_s
+            while time.perf_counter() < response_end:
+                events = pygame.event.get()
+                for event in events:
+                    if event.type == pygame.QUIT:
+                        _abort(trial_i)
+                        return
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                        _abort(trial_i)
+                        return
+                polled = poll_direction(events=events)
+                if polled is not None:
+                    response_dir = polled
+                    rt_ms = int((time.perf_counter() - response_t0) * 1000)
+                    break
+                remaining = max(0.0, response_end - time.perf_counter())
+                _draw_fixation(
+                    screen,
+                    font,
+                    w,
+                    h,
+                    title=f"Essai {trial_i + 1}/{len(trials)}",
+                    hint=f"Flèches — {remaining:.1f} s restantes",
+                )
+                clock.tick(60)
 
         if response_dir is not None:
             _play_cue(
@@ -368,6 +422,7 @@ def run_neuroconn_gvs_node(
                 w,
                 h,
                 audio_cfg=audio_cfg,
+                skip=skip_sounds,
             )
             gvs_lsl.response_perceived(response_dir, correct=None if condition == "CONTROL" else response_dir == condition)
         else:
@@ -379,8 +434,8 @@ def run_neuroconn_gvs_node(
                 w,
                 h,
                 audio_cfg=audio_cfg,
+                skip=skip_sounds,
             )
-
         correct = None if condition == "CONTROL" else (response_dir == condition if response_dir else None)
         session.log_response(
             node_index=node.index,

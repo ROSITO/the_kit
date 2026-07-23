@@ -44,6 +44,7 @@
       "params": {
         "amplitude": 1.2,
         "repetitions_per_condition": 10,
+        "conditions": ["AP", "PA", "LATG", "LATD", "CONTROL"],
         "rise_s": 3.0,
         "plateau_s": 4.0,
         "fall_s": 3.0,

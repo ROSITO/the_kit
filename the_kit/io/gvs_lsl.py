@@ -33,9 +33,9 @@ def push(code: int | float, *, label: str = "") -> bool:
     value = int(code)
     ok = lsl.push_marker(float(value), label=label)
     if ok:
-        print(f"🎯 LSL Trigger {value} ({label})")
+        print(f"[lsl] Trigger {value} ({label})")
     else:
-        print(f"🔘 [SIMULATION] Trigger {value} ({label})")
+        print(f"[lsl] [SIMULATION] Trigger {value} ({label})")
     return ok
 
 

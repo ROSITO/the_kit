@@ -27,7 +27,7 @@ def test_play_cue_missing_file(capsys):
 
     meta = play_cue_file(Path("/nonexistent/file.mp3"))
     assert meta.get("missing") is True
-    assert "manquant" in capsys.readouterr().out
+    assert "missing file" in capsys.readouterr().out
 
 
 def test_is_portaudio_available():

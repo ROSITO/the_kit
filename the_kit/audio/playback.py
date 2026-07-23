@@ -78,9 +78,9 @@ def _play_portaudio(
         "aborted": aborted,
     }
     if "wasapi" in hostapi.lower():
-        print(f"🔊 WASAPI — {path.name} ({meta['duration_s']:.2f}s)")
+        print(f"[audio] WASAPI - {path.name} ({meta['duration_s']:.2f}s)")
     else:
-        print(f"🔊 {hostapi} — {path.name} ({meta['duration_s']:.2f}s)")
+        print(f"[audio] {hostapi} - {path.name} ({meta['duration_s']:.2f}s)")
     return meta
 
 
@@ -103,7 +103,7 @@ def _play_pygame(
             break
         time.sleep(0.005)
     pygame.mixer.music.stop()
-    print(f"🔊 pygame.mixer — {path.name}")
+    print(f"[audio] pygame.mixer - {path.name}")
     return {"backend": "pygame", "aborted": aborted}
 
 
@@ -120,7 +120,7 @@ def play_cue_file(
     est installé (``uv sync --extra lowlatency``).
     """
     if not path.is_file():
-        print(f"⚠ audio manquant : {path}")
+        print(f"[audio] missing file: {path}")
         return {"backend": "none", "aborted": False, "missing": True}
 
     cfg = dict(audio_cfg or {})
@@ -129,7 +129,7 @@ def play_cue_file(
         try:
             return _play_portaudio(path, cfg, on_frame=on_frame)
         except Exception as exc:
-            print(f"⚠ PortAudio ({path.name}) : {exc} — repli pygame.mixer")
+            print(f"[audio] PortAudio fallback for {path.name}: {exc}")
     return _play_pygame(path, on_frame=on_frame)
 
 

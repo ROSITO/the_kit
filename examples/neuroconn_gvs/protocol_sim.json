@@ -1,19 +1,14 @@
 {
   "protocol_version": "1.0",
-  "name": "neuroconn_gvs_dryrun",
+  "name": "neuroconn_gvs_sim",
   "loop": 1,
   "audio_defaults": {
     "timing_mode": "low_latency",
-    "backend": "auto",
+    "backend": "pygame",
     "blocksize": 128
   },
   "lsl": {
-    "enabled": true,
-    "stream_name": "Trigger",
-    "stream_type": "Markers",
-    "channel_count": 1,
-    "channel_format": "int32",
-    "source_id": "the_kit_gvs_dryrun",
+    "enabled": false,
     "auto_markers": false
   },
   "ni_daq": {
@@ -25,16 +20,6 @@
   },
   "nodes": [
     {
-      "id": "consignes",
-      "type": "instructions",
-      "engine": "qt",
-      "params": {
-        "text": "Dry-run GVS — 4 essais (2× AP + CONTROL). Flèches clavier/manette.",
-        "duration_s": 2,
-        "key": "space"
-      }
-    },
-    {
       "id": "gvs_block",
       "type": "neuroconn_gvs",
       "engine": "pygame",
@@ -42,14 +27,16 @@
         "amplitude": 1.2,
         "repetitions_per_condition": 2,
         "conditions": ["AP", "CONTROL"],
-        "rise_s": 3.0,
-        "plateau_s": 4.0,
-        "fall_s": 3.0,
-        "baseline_s": 3.0,
-        "response_window_s": 5.0,
-        "iti_base_s": 1.0,
-        "iti_jitter_s": [0.0, 0.5],
-        "random_seed": 99,
+        "rise_s": 0.1,
+        "plateau_s": 0.1,
+        "fall_s": 0.1,
+        "baseline_s": 0.5,
+        "response_window_s": 0.5,
+        "iti_base_s": 0.2,
+        "iti_jitter_s": [0.0, 0.1],
+        "random_seed": 7,
+        "auto_respond": true,
+        "skip_sounds": true,
         "sounds": {
           "debut_dexpe": "debut_dexpe.mp3",
           "vous_pouvez_repondre": "vous_pouvez_repondre.mp3",

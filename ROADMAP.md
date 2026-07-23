@@ -262,7 +262,7 @@ gantt
 
 | Item | Statut |
 |------|--------|
-| Export BIDS-like | ✅ `export-session`, `--export-session` |
+| Export BIDS | ✅ systématique en fin de `run` (`--no-export-session` pour off) |
 | Rapport HTML session (F-1707) | ✅ `session_report.html` |
 | Latin square (F-1105) | ✅ `presentation.counterbalance` |
 | CI GitHub Actions | ✅ `.github/workflows/ci.yml` |

@@ -151,7 +151,7 @@ class SdlGameControllerBackend(GamepadBackend):
         self._controller = controller
         self._device_id = device_id
         self._device_name = name
-        print(f"🎮 SDL GameController [{device_id}] {name}")
+        print(f"[gamepad] SDL GameController [{device_id}] {name}")
         return True
 
     def close(self) -> None:
@@ -215,7 +215,7 @@ class PygameJoystickBackend(GamepadBackend):
         if not self._button_map and joy.get_numhats() == 0:
             self._button_map = {**JOYCON_L_SDL224, **JOYCON_L_LEGACY, **JOYCON_PAIR_DPAD}
         print(
-            f"🎮 pygame joystick [{index}] {name} — "
+            f"[gamepad] pygame joystick [{index}] {name} - "
             f"hats={joy.get_numhats()} buttons={joy.get_numbuttons()} axes={joy.get_numaxes()}"
         )
         return True
@@ -345,10 +345,10 @@ class PyJoyConBackend(GamepadBackend):
         try:
             self._button_event = ButtonEventJoyCon(*joycon_id)
             self._device_name = f"pyjoycon {joycon_id}"
-            print(f"🎮 pyjoycon HID — {self._device_name}")
+            print(f"[gamepad] pyjoycon HID - {self._device_name}")
             return True
         except Exception as exc:
-            print(f"⚠ pyjoycon : {exc}")
+            print(f"[gamepad] pyjoycon error: {exc}")
             return False
 
     def close(self) -> None:

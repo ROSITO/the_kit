@@ -53,7 +53,8 @@ uv run python -m the_kit check-lsl    # uv pip install pylsl
 | `the_kit design` | Concepteur Qt (presets, validation) |
 | `the_kit import-p19 -c config.json -o protocol.json` | Import P1-P9 |
 | `the_kit export-zip -p protocol.json -o pack.zip` | Export protocole + assets |
-| `the_kit export-session -d sessions/...` | BIDS-like + `session_report.html` |
-| `the_kit run ... --export-session` | Idem à la fin du run |
+| `the_kit export-session -d sessions/...` | Re-exporter BIDS + rapport HTML |
+| `the_kit export-dataset -i sessions/ -o bids_dataset/` | Agrège plusieurs sessions en un dataset BIDS |
+| `the_kit run ...` | Export BIDS automatique en fin de session (`--no-export-session` pour désactiver) |
 
 Démos : `examples/demo_multi_engine/`, `examples/demo_phase3/`. Presets : `examples/presets/` (dont `occultation_classic.json`, `shadow_ball_congruent.json`). Calibration terrain : [doc_calibration.md](./doc_calibration.md).

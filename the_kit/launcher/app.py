@@ -99,10 +99,8 @@ def run_launcher() -> int:
             self.dry_run_cb = QCheckBox("Dry-run")
             self.dry_run_cb.setToolTip("Simuler NI / triggers sans matériel")
             self.check_media_cb = QCheckBox("Vérifier médias")
-            self.export_session_cb = QCheckBox("Export session")
             opts_row.addWidget(self.dry_run_cb)
             opts_row.addWidget(self.check_media_cb)
-            opts_row.addWidget(self.export_session_cb)
             opts_row.addStretch()
             form.addRow("Options :", opts_row)
 
@@ -200,7 +198,6 @@ def run_launcher() -> int:
             self.subject_edit.setEnabled(not running)
             self.dry_run_cb.setEnabled(not running)
             self.check_media_cb.setEnabled(not running)
-            self.export_session_cb.setEnabled(not running)
 
         def _run(self) -> None:
             path = self.protocol_edit.text().strip()
@@ -223,8 +220,7 @@ def run_launcher() -> int:
                 args.append("--dry-run")
             if self.check_media_cb.isChecked():
                 args.append("--check-media")
-            if self.export_session_cb.isChecked():
-                args.append("--export-session")
+            # BIDS + rapport HTML : toujours exportés en fin de session (défaut CLI).
 
             self.log_view.clear()
             self._append_log(f"$ {' '.join(args)}\n\n")

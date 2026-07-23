@@ -36,7 +36,7 @@ class SessionLogger:
         session_dir: Path,
         *,
         lsl_enabled: bool = False,
-        export_artifacts: bool = False,
+        export_artifacts: bool = True,
     ):
         self.protocol = protocol
         self.session_dir = session_dir
@@ -163,9 +163,19 @@ class SessionLogger:
         meta.update(ended)
         meta_path.write_text(json.dumps(meta, indent=2, ensure_ascii=False), encoding="utf-8")
         if self._export_artifacts:
-            from the_kit.session_export import export_session_artifacts
+            try:
+                from the_kit.session_export import export_session_artifacts
 
-            export_session_artifacts(self.session_dir)
+                paths = export_session_artifacts(self.session_dir)
+                bids = paths.get("bids")
+                report = paths.get("report")
+                if bids is not None:
+                    print(f"BIDS: {bids}")
+                if report is not None:
+                    print(f"report: {report}")
+            except Exception as exc:
+                # Ne pas perdre la session si l'export échoue ; signaler clairement.
+                print(f"[export] Échec export BIDS/rapport: {exc}")
 
     @classmethod
     def create_default_dir(

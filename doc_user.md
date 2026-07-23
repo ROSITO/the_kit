@@ -164,19 +164,59 @@ Calibration A/V terrain : [doc_calibration.md](./doc_calibration.md).
 
 ## Phase 4 — export session & counterbalancing
 
-### Export BIDS-like + rapport HTML
+### Export BIDS + rapport HTML
+
+**Systématique** : chaque `the_kit run` exporte automatiquement un dataset BIDS
+(`bids/`) + `session_report.html` à la fin de la session (0 erreur validateur
+attendu). Désactiver uniquement si besoin : `--no-export-session`.
 
 ```bash
-# Après un run
+# Après un run (déjà généré) — ou pour re-exporter
 uv run python -m the_kit export-session -d sessions/20260522_164848_DEMO3
 
-# Ou directement à la fin du run
-uv run python -m the_kit run -p protocol.json -s S001 --export-session
+# Run normal : export BIDS inclus
+uv run python -m the_kit run -p protocol.json -s S001
+
+# Sans export
+uv run python -m the_kit run -p protocol.json -s S001 --no-export-session
 ```
 
 Génère dans le dossier session :
-- `bids/participants.tsv`, `bids/*_events.tsv`, `dataset_description.json`
-- `session_report.html` (résumé expérimentateur)
+
+```text
+bids/
+  README
+  dataset_description.json   # DatasetType: raw
+  participants.tsv           # 1 ligne / sujet
+  participants.json
+  sub-<id>/
+    sub-<id>_sessions.tsv
+    sub-<id>_sessions.json
+    ses-<YYYYMMDDHHMMSS>/beh/
+      sub-..._ses-..._task-<task>_events.tsv|.json
+      sub-..._ses-..._task-<task>_beh.tsv|.json
+session_report.html
+```
+
+Colonnes `events.tsv` stables : `onset`, `duration`, `trial_type`, `event`, `node_id`,
+`engine`, `stimulus`, `response`, `response_time`, `value`, `payload_json` (payload restant).
+Les champs métier spécifiques (ex. GVS) restent dans `payload_json`.
+Les sidecars JSON déclarent chaque colonne en clé de premier niveau (conforme BIDS).
+`beh.tsv` liste les réponses sans `onset`/`duration` (réservés à `events.tsv`).
+
+Re-exporter une session met à jour `DatasetType` / README si besoin :
+
+```bash
+uv run python -m the_kit export-session -d sessions/<session>
+```
+
+### Agrégation multi-sujets
+
+```bash
+uv run python -m the_kit export-dataset -i sessions/ -o bids_dataset/
+```
+
+Fusionne toutes les sessions détectées (`session_meta.json` + `events.jsonl`) dans un dataset BIDS unique.
 
 ### Latin square
 

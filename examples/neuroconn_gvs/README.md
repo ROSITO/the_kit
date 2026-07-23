@@ -207,7 +207,7 @@ uv run python -m the_kit run \
 | `-s` / `--subject` | Identifiant participant |
 | `--dry-run` | NI + triggers simulés (pas de tension réelle) |
 | `--check-media` | Refuse le run si MP3 manquants |
-| `--export-session` | Génère BIDS-like + rapport HTML en fin de session |
+| `--export-session` / `--no-export-session` | BIDS + rapport HTML (activé par défaut) |
 
 ---
 
@@ -256,6 +256,8 @@ Fin bloc                     → trigger 1
 | **CONTROL** | Rampe mélangée (pas de « bonne » réponse) | **6** |
 
 10 répétitions par condition, ordre mélangé (`random_seed` dans le JSON).
+
+Sous-ensemble possible via `params.conditions` (ex. `["AP", "PA", "CONTROL"]`).
 
 ---
 
@@ -371,7 +373,7 @@ Fichiers :
 | Fichier | Usage |
 |---------|-------|
 | `protocol.json` | Session réelle — 50 essais, baseline 60 s |
-| `protocol_dryrun.json` | Test — 10 essais (2×5), baseline 3 s, NI simulé |
+| `protocol_dryrun.json` | Test — 4 essais (2× AP + CONTROL), baseline 3 s, NI simulé |
 
 Paramètres principaux (`gvs_block` → `params`) :
 
@@ -379,6 +381,7 @@ Paramètres principaux (`gvs_block` → `params`) :
 |-----------|--------|-------------|
 | `amplitude` | `1.2` | Amplitude rampe (V) |
 | `repetitions_per_condition` | `10` | Essais par condition |
+| `conditions` | les 5 | Sous-ensemble : `AP`, `PA`, `LATG`, `LATD`, `CONTROL` |
 | `rise_s` / `plateau_s` / `fall_s` | 3 / 4 / 3 | Forme trapèze (s) |
 | `baseline_s` | `60.0` | Baseline initiale (s) |
 | `response_window_s` | `5.0` | Fenêtre réponse après consigne (s) |
@@ -399,7 +402,14 @@ Dossier : `sessions/YYYYMMDD_HHMMSS_<subject>/`
 | `protocol_executed.json` | Copie du protocole exécuté |
 | `environment.json` | Versions Python, OS, dépendances |
 
-Export optionnel : `python -m the_kit export-session -d sessions/...`
+Export BIDS générique (toutes manips, pas seulement GVS) :
+
+```bash
+python -m the_kit export-session -d sessions/...
+python -m the_kit export-dataset -i sessions/ -o bids_dataset/
+```
+
+Les détails GVS (condition, stim, …) restent dans `payload_json` des `*_events.tsv`.
 
 ---
 

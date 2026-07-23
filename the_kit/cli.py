@@ -92,7 +92,7 @@ def cmd_check_audio(_args: argparse.Namespace) -> int:
     if "bluetooth" in str(hostapi).lower() or any(
         "bluetooth" in (d.get("name") or "").lower() for d in list_output_devices()
     ):
-        print("\n⚠ Bluetooth détecté — éviter pour essais sync A/V.")
+        print("\nWarning: Bluetooth detected; avoid it for sync A/V trials.")
     return 0
 
 
@@ -187,6 +187,22 @@ def cmd_export_session(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_export_dataset(args: argparse.Namespace) -> int:
+    from the_kit.session_export import export_dataset
+
+    try:
+        out = export_dataset(
+            args.input,
+            args.output,
+            task_name=args.task_name,
+        )
+    except FileNotFoundError as e:
+        print(f"Erreur : {e}", file=sys.stderr)
+        return 1
+    print(f"dataset: {out}")
+    return 0
+
+
 def cmd_launch(_args: argparse.Namespace) -> int:
     from the_kit.launcher.app import run_launcher
 
@@ -234,8 +250,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_run.add_argument(
         "--export-session",
-        action="store_true",
-        help="Générer bids/ + session_report.html à la fin",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "Générer bids/ + session_report.html à la fin "
+            "(activé par défaut ; --no-export-session pour désactiver)"
+        ),
     )
     p_run.set_defaults(func=cmd_run)
 
@@ -246,6 +266,25 @@ def build_parser() -> argparse.ArgumentParser:
     p_exs.add_argument("--session-dir", "-d", required=True)
     p_exs.add_argument("--task-name", default=None)
     p_exs.set_defaults(func=cmd_export_session)
+
+    p_exd = sub.add_parser(
+        "export-dataset",
+        help="Agréger plusieurs sessions en un dataset BIDS",
+    )
+    p_exd.add_argument(
+        "--input",
+        "-i",
+        required=True,
+        help="Dossier sessions/ (ou une session unique)",
+    )
+    p_exd.add_argument(
+        "--output",
+        "-o",
+        required=True,
+        help="Dossier dataset BIDS de sortie",
+    )
+    p_exd.add_argument("--task-name", default=None)
+    p_exd.set_defaults(func=cmd_export_dataset)
 
     p_val = sub.add_parser("validate", help="Valider un protocole sans l'exécuter")
     p_val.add_argument("--protocol", "-p", required=True)

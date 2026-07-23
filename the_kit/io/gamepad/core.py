@@ -49,10 +49,10 @@ def init_gamepad(*, preference: str = "auto") -> int:
     for backend in _backend_chain(preference):
         if backend.open():
             _active_backend = backend
-            print(f"   → backend actif : {backend.name}")
+            print(f"[gamepad] active backend: {backend.name}")
             return count
 
-    print("🎮 Aucune manette — clavier uniquement")
+    print("[gamepad] no controller detected; keyboard only")
     _active_backend = None
     return count
 

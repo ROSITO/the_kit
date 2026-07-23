@@ -26,6 +26,25 @@ def test_fifty_trials():
         assert trials.count(c) == 10
 
 
+def test_subset_conditions():
+    from the_kit.pygame_handlers.neuroconn_gvs import _normalize_conditions
+
+    conds = _normalize_conditions(["AP", "control", "AP"])
+    assert conds == ["AP", "CONTROL"]
+    trials = _build_trial_list(3, seed=0, conditions=conds)
+    assert len(trials) == 6
+    assert set(trials) == {"AP", "CONTROL"}
+    assert trials.count("AP") == 3
+
+
+def test_unknown_condition_raises():
+    from the_kit.pygame_handlers.neuroconn_gvs import _normalize_conditions
+    import pytest
+
+    with pytest.raises(ValueError, match="inconnue"):
+        _normalize_conditions(["AP", "FOO"])
+
+
 def test_lsl_codes():
     assert GVS_CONDITION_CODES["AP"] == 2
     assert GVS_CONDITION_CODES["PA"] == 3

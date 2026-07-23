@@ -33,7 +33,7 @@ class Orchestrator:
         *,
         dry_run: bool = False,
         project_root: Path | None = None,
-        export_artifacts: bool = False,
+        export_artifacts: bool = True,
     ):
         self.protocol = protocol
         self.dry_run = dry_run
@@ -73,7 +73,7 @@ class Orchestrator:
         dry_run: bool = False,
         check_media: bool = False,
         project_root: Path | None = None,
-        export_artifacts: bool = False,
+        export_artifacts: bool = True,
     ) -> Orchestrator:
         protocol = load_protocol(
             path, subject_id=subject_id, subject_group=subject_group
