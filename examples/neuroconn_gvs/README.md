@@ -152,7 +152,7 @@ NI-DAQ : connecté — Dev1/ao0, Dev1/ao1 @ 400.0 Hz
 Puis, à chaque essai :
 
 ```text
-NI write ramp_AP: N=4000 dur=10.00s amp≈1.200V → carte
+NI write ramp_AP: N=4000 dur=10.00s amp~=1.200V -> carte
 🎯 LSL Trigger 2 (stim_onset_AP)
 ```
 
@@ -417,9 +417,10 @@ Les détails GVS (condition, stim, …) restent dans `payload_json` des `*_event
 
 | Symptôme | Cause probable | Action |
 |----------|----------------|--------|
+| `charmap ... \u2248` / crash après `stim_onset_*` | Print console Windows (cp1252) sur `≈` | Mettre à jour The Kit (≥ fix ASCII NI write) ; relancer |
 | `NI-DAQ : SIMULATION` en session réelle | `--dry-run` ou `simulation_mode: true` | Retirer `--dry-run`, mettre `simulation_mode: false` |
 | Pas de triggers LSL | `pylsl` absent ou LabRecorder non abonné | `pip install pylsl` ; vérifier stream `Trigger` |
-| Pas de son | MP3 absents ou backend audio | `--check-media` ; `check-audio` ; vérifier `🔊 WASAPI` dans le terminal |
+| Pas de son | MP3 absents ou backend audio | `--check-media` ; `check-audio` ; vérifier `[audio] WASAPI` dans le terminal |
 | `Erreur : module 'pygame.event' has no attribute 'PUMP'` | Ancienne version | Mettre à jour le dépôt |
 | Essais très courts en dry-run | Normal | NI simulé (~50 ms) ; en labo la stim dure 10 s réelles |
 | Carte NI introuvable | Mauvais `device` ou driver | NI MAX → vérifier nom (`Dev1`) ; `check-ni` |

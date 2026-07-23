@@ -246,7 +246,7 @@ def _write_waveform_to_task(
 
     print(
         f"NI write {label}: N={n} dur={duration_s:.2f}s "
-        f"amp≈{max(abs(v) for v in ch0):.3f}V → carte"
+        f"amp~={max(abs(v) for v in ch0):.3f}V -> carte"
     )
     _task.write(ao_data, auto_start=True)
     # Alba utilise sleep(duration) ; wait_until_done est plus précis
