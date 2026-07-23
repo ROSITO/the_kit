@@ -386,6 +386,11 @@ def run_neuroconn_gvs_node(
                 response_dir = condition
             rt_ms = int(rng.uniform(250, 900))
             time.sleep(min(0.05, response_window_s))
+            # Trigger 8 immédiat (comme NIRS_experiment), avant le feedback audio
+            gvs_lsl.response_perceived(
+                response_dir,
+                correct=None if condition == "CONTROL" else response_dir == condition,
+            )
         else:
             response_end = response_t0 + response_window_s
             while time.perf_counter() < response_end:
@@ -401,6 +406,11 @@ def run_neuroconn_gvs_node(
                 if polled is not None:
                     response_dir = polled
                     rt_ms = int((time.perf_counter() - response_t0) * 1000)
+                    # Trigger 8 au moment exact de la réponse (pas après le MP3)
+                    gvs_lsl.response_perceived(
+                        response_dir,
+                        correct=None if condition == "CONTROL" else response_dir == condition,
+                    )
                     break
                 remaining = max(0.0, response_end - time.perf_counter())
                 _draw_fixation(
@@ -424,7 +434,6 @@ def run_neuroconn_gvs_node(
                 audio_cfg=audio_cfg,
                 skip=skip_sounds,
             )
-            gvs_lsl.response_perceived(response_dir, correct=None if condition == "CONTROL" else response_dir == condition)
         else:
             _play_cue(
                 _audio_path(session, p, "fin_du_temps"),

@@ -233,16 +233,16 @@ Fin bloc                     → trigger 1
 |-------|-------|---------|-------------|
 | Stimulation GVS (rampe) | 10 s | **Interdite** | **2–6** à l’onset (selon condition) |
 | Son `vous_pouvez_repondre.mp3` | ~2,2 s | Interdite | — |
-| Fenêtre de réponse | 5 s max | Optionnelle (flèches / manette) | — |
-| Si réponse → `Votre_reponse.mp3` | ~3,8 s | — | **8** |
-| Si pas de réponse → `fin_du_temps.mp3` | ~3,3 s | — | — |
+| Fenêtre de réponse | 5 s max | Optionnelle (flèches / manette) | **8** dès la réponse |
+| Si réponse → `Votre_reponse.mp3` | ~3,8 s | — | — (après le 8) |
+| Si pas de réponse → `fin_du_temps.mp3` | ~3,3 s | — | — (pas de 8) |
 | ITI | 10 + U(1,5) s | — | **7** (après le son de feedback) |
 
 **Comportement réponse :**
 
 - Le décompte des **5 s** commence **après** la fin de `vous_pouvez_repondre.mp3`.
-- Dès la **première** réponse : lecture immédiate de `Votre_reponse.mp3` et **fin** de la fenêtre (plus d’attente).
-- Le sujet peut **ne pas répondre** : après 5 s, `fin_du_temps.mp3` est joué.
+- Dès la **première** réponse : trigger LSL **8** immédiat, puis `Votre_reponse.mp3` et **fin** de la fenêtre.
+- Le sujet peut **ne pas répondre** : après 5 s, `fin_du_temps.mp3` est joué (pas de trigger 8).
 - Le **RT** est mesuré depuis la fin de `vous_pouvez_repondre.mp3` jusqu’à la réponse.
 
 ### Conditions (50 essais)
