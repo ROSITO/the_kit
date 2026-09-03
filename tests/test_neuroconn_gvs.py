@@ -56,6 +56,55 @@ def test_lsl_codes():
     assert GVS_RESPONSE == 8
 
 
+def test_trigger_table_defaults():
+    from the_kit.io.gvs_lsl import TriggerTable
+
+    t = TriggerTable()
+    assert t.resolve("stim_onset", condition="LATG") == (4, "Onset stim gauche (LATG)")
+    assert t.resolve("response")[0] == 8
+    assert t.resolve("stim_offset", condition="AP")[0] is None
+
+
+def test_trigger_table_override_latg():
+    from the_kit.io.gvs_lsl import TriggerTable
+
+    t = TriggerTable(
+        {
+            "stim_onset": {
+                "LATG": {"code": 11, "why": "Onset gauche protocole alt"},
+            },
+            "response": 20,
+        }
+    )
+    code, why = t.resolve("stim_onset", condition="LATG")
+    assert code == 11
+    assert "alt" in why
+    assert t.resolve("stim_onset", condition="LATD")[0] == 5
+    assert t.resolve("response")[0] == 20
+
+
+def test_trigger_table_skip_null_code():
+    from the_kit.io.gvs_lsl import TriggerTable
+
+    t = TriggerTable({"iti": {"code": None, "why": "pas d'ITI"}})
+    assert t.resolve("iti")[0] is None
+
+
+def test_protocol_json_declares_triggers():
+    from pathlib import Path
+
+    from the_kit.protocol.loader import load_protocol
+
+    root = Path(__file__).resolve().parents[1]
+    p = load_protocol(root / "examples" / "neuroconn_gvs" / "protocol.json")
+    gvs = next(n for n in p.nodes if n.type == "neuroconn_gvs")
+    triggers = gvs.params["triggers"]
+    assert triggers["stim_onset"]["LATG"]["code"] == 4
+    assert triggers["response"]["code"] == 8
+    assert "why" in triggers["stim_onset"]["LATG"]
+
+
+
 def test_protocol_valid():
     from pathlib import Path
 

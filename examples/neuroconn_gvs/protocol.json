@@ -54,6 +54,29 @@
         "iti_jitter_s": [1.0, 5.0],
         "random_seed": 42,
         "gamepad_backend": "auto",
+        "triggers": {
+          "block_start": {"code": 1, "why": "Debut bloc GVS"},
+          "block_end": {"code": 1, "why": "Fin bloc GVS"},
+          "aborted": {"code": 1, "why": "Bloc interrompu"},
+          "baseline_start": {"code": 1, "why": "Debut baseline"},
+          "baseline_end": {"code": 1, "why": "Fin baseline"},
+          "stim_onset": {
+            "AP": {"code": 2, "why": "Onset stim avant (AP)"},
+            "PA": {"code": 3, "why": "Onset stim arriere (PA)"},
+            "LATG": {"code": 4, "why": "Onset stim gauche (LATG)"},
+            "LATD": {"code": 5, "why": "Onset stim droite (LATD)"},
+            "CONTROL": {"code": 6, "why": "Onset stim controle"}
+          },
+          "stim_offset": {
+            "AP": {"code": null, "why": "Offset stim avant (AP)"},
+            "PA": {"code": null, "why": "Offset stim arriere (PA)"},
+            "LATG": {"code": null, "why": "Offset stim gauche (LATG)"},
+            "LATD": {"code": null, "why": "Offset stim droite (LATD)"},
+            "CONTROL": {"code": null, "why": "Offset stim controle"}
+          },
+          "response": {"code": 8, "why": "Reponse sujet"},
+          "iti": {"code": 7, "why": "Intervalle inter-essai"}
+        },
         "sounds": {
           "debut_dexpe": "debut_dexpe.mp3",
           "vous_pouvez_repondre": "vous_pouvez_repondre.mp3",

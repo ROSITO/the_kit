@@ -50,6 +50,19 @@
         "iti_base_s": 1.0,
         "iti_jitter_s": [0.0, 0.5],
         "random_seed": 99,
+        "triggers": {
+          "block_start": {"code": 1, "why": "Debut bloc GVS"},
+          "block_end": {"code": 1, "why": "Fin bloc GVS"},
+          "aborted": {"code": 1, "why": "Bloc interrompu"},
+          "baseline_start": {"code": 1, "why": "Debut baseline"},
+          "baseline_end": {"code": 1, "why": "Fin baseline"},
+          "stim_onset": {
+            "AP": {"code": 2, "why": "Onset stim avant (AP)"},
+            "CONTROL": {"code": 6, "why": "Onset stim controle"}
+          },
+          "response": {"code": 8, "why": "Reponse sujet"},
+          "iti": {"code": 7, "why": "Intervalle inter-essai"}
+        },
         "sounds": {
           "debut_dexpe": "debut_dexpe.mp3",
           "vous_pouvez_repondre": "vous_pouvez_repondre.mp3",

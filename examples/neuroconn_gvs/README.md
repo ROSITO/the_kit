@@ -265,18 +265,35 @@ Sous-ensemble possible via `params.conditions` (ex. `["AP", "PA", "CONTROL"]`).
 
 Stream LabRecorder : nom **`Trigger`**, format **int32**, source `the_kit_gvs`.
 
-| Code | Événement |
-|------|-----------|
-| **1** | Début / fin de bloc GVS ; début / fin baseline |
-| **2** | Stim onset — AP |
-| **3** | Stim onset — PA |
-| **4** | Stim onset — LATG |
-| **5** | Stim onset — LATD |
-| **6** | Stim onset — CONTROL |
-| **7** | Début ITI (après son de feedback) |
-| **8** | Réponse enregistrée |
+Les codes **ne sont plus figés dans le code Python**. Ils se règlent dans
+`params.triggers` du nœud `neuroconn_gvs` (numéro + motif `why`).
 
-Chaque trigger s’affiche dans le terminal : `🎯 LSL Trigger N (label)`.
+Défauts (protocole classique, aligné NIRS) :
+
+| Étape | Clé JSON | Code défaut |
+|-------|----------|-------------|
+| Début / fin de bloc, abort | `block_start` / `block_end` / `aborted` | **1** |
+| Baseline début / fin | `baseline_start` / `baseline_end` | **1** |
+| Stim onset AP / PA / LATG / LATD / CONTROL | `stim_onset.<cond>` | **2–6** |
+| Stim offset | `stim_offset.<cond>` | **null** (pas envoyé) |
+| ITI | `iti` | **7** |
+| Réponse sujet | `response` | **8** |
+
+Exemple : un autre protocole peut envoyer **11** pour LATG sans toucher au protocole classique :
+
+```json
+"triggers": {
+  "stim_onset": {
+    "LATG": {"code": 11, "why": "Onset stim gauche — proto visuel"}
+  },
+  "response": {"code": 8, "why": "Reponse sujet"}
+}
+```
+
+- `code: null` → l'étape n'envoie **aucun** trigger.
+- Forme courte acceptée : `"response": 8`.
+- Chaque envoi est logué dans `events.jsonl` (`event: lsl_trigger`, champs `code` / `why`).
+- Console : `[lsl] Trigger N (why | extra)`.
 
 `auto_markers: false` dans le protocole — pas de marqueurs parasites `node_start` / `node_end`.
 
@@ -388,6 +405,7 @@ Paramètres principaux (`gvs_block` → `params`) :
 | `iti_base_s` | `10.0` | ITI de base (s) |
 | `iti_jitter_s` | `[1.0, 5.0]` | Jitter ITI uniforme (s) |
 | `random_seed` | `42` | Graine ordre des essais |
+| `triggers` | table NIRS 1–8 | Codes LSL + `why` par étape / condition |
 
 ---
 

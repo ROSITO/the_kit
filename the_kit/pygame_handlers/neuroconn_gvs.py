@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from the_kit.io.gvs_lsl import TriggerTable
     from the_kit.logging.session import SessionLogger
     from the_kit.protocol.models import Node
 
@@ -167,6 +168,35 @@ def _wait_seconds(
     return False
 
 
+def _emit_trigger(
+    session: SessionLogger,
+    node: Node,
+    table: TriggerTable,
+    stage: str,
+    *,
+    condition: str | None = None,
+    extra: str = "",
+) -> tuple[int | None, str]:
+    code, why = table.push(stage, condition=condition, extra=extra)
+    if code is None:
+        return None, why
+    session.log_event(
+        "lsl_trigger",
+        node_id=node.node_id,
+        node_type=node.type,
+        node_index=node.index,
+        engine=node.engine,
+        payload={
+            "stage": stage,
+            "condition": condition,
+            "code": code,
+            "why": why,
+            "extra": extra or None,
+        },
+    )
+    return code, why
+
+
 def _run_baseline(
     session: SessionLogger,
     node: Node,
@@ -177,10 +207,9 @@ def _run_baseline(
     font,
     w: int,
     h: int,
+    triggers: TriggerTable,
 ) -> bool:
-    from the_kit.io import gvs_lsl
-
-    gvs_lsl.baseline_start()
+    _emit_trigger(session, node, triggers, "baseline_start")
     session.log_event(
         "gvs_baseline_start",
         node_id=node.node_id,
@@ -199,7 +228,7 @@ def _run_baseline(
         title="Baseline",
         hint="Fixation",
     )
-    gvs_lsl.baseline_end()
+    _emit_trigger(session, node, triggers, "baseline_end")
     session.log_event(
         "gvs_baseline_end",
         node_id=node.node_id,
@@ -220,8 +249,9 @@ def run_neuroconn_gvs_node(
 ) -> None:
     import pygame
 
-    from the_kit.io import gvs_lsl, nidaqmx_io
+    from the_kit.io import nidaqmx_io
     from the_kit.io.gamepad import direction_label, poll_direction
+    from the_kit.io.gvs_lsl import load_trigger_table
 
     p = node.params
     amplitude = float(p.get("amplitude", 1.2))
@@ -238,11 +268,12 @@ def run_neuroconn_gvs_node(
     conditions = _normalize_conditions(p.get("conditions"))
     auto_respond = bool(p.get("auto_respond", False))
     skip_sounds = bool(p.get("skip_sounds", False)) or auto_respond
+    triggers = load_trigger_table(p)
 
     trials = _build_trial_list(reps, seed, conditions=conditions)
 
     def _abort(trial_i: int | None = None) -> None:
-        gvs_lsl.push(gvs_lsl.GVS_BLOCK_END, label="aborted")
+        _emit_trigger(session, node, triggers, "aborted")
         session.log_event(
             "node_end",
             node_id=node.node_id,
@@ -275,9 +306,10 @@ def run_neuroconn_gvs_node(
             "gamepad": pad_status,
             "auto_respond": auto_respond,
             "skip_sounds": skip_sounds,
+            "triggers": triggers.as_payload(),
         },
     )
-    gvs_lsl.push(gvs_lsl.GVS_BLOCK_START, label="gvs_block_start")
+    _emit_trigger(session, node, triggers, "block_start")
 
     audio_cfg = audio_config_from_session(session, node)
     if p.get("audio"):
@@ -308,7 +340,17 @@ def run_neuroconn_gvs_node(
         audio_cfg=audio_cfg,
         skip=skip_sounds,
     )
-    if _run_baseline(session, node, duration_s=baseline_s, screen=screen, clock=clock, font=font, w=w, h=h):
+    if _run_baseline(
+        session,
+        node,
+        duration_s=baseline_s,
+        screen=screen,
+        clock=clock,
+        font=font,
+        w=w,
+        h=h,
+        triggers=triggers,
+    ):
         _abort()
         return
 
@@ -327,7 +369,7 @@ def run_neuroconn_gvs_node(
 
         def _run_stim() -> None:
             try:
-                gvs_lsl.stim_onset(condition)
+                _emit_trigger(session, node, triggers, "stim_onset", condition=condition)
                 stim_meta.update(
                     nidaqmx_io.send_ramp_stim(
                         direction=condition,
@@ -362,6 +404,7 @@ def run_neuroconn_gvs_node(
         if stim_error:
             raise stim_error[0]
         stim_duration_ms = int((time.perf_counter() - stim_t0) * 1000)
+        _emit_trigger(session, node, triggers, "stim_offset", condition=condition)
 
         # Consigne réponse puis fenêtre 5 s (décompte après le son)
         _play_cue(
@@ -385,12 +428,11 @@ def run_neuroconn_gvs_node(
             else:
                 response_dir = condition
             rt_ms = int(rng.uniform(250, 900))
+            extra = response_dir
+            if condition != "CONTROL":
+                extra += "_correct" if response_dir == condition else "_incorrect"
+            _emit_trigger(session, node, triggers, "response", extra=extra)
             time.sleep(min(0.05, response_window_s))
-            # Trigger 8 immédiat (comme NIRS_experiment), avant le feedback audio
-            gvs_lsl.response_perceived(
-                response_dir,
-                correct=None if condition == "CONTROL" else response_dir == condition,
-            )
         else:
             response_end = response_t0 + response_window_s
             while time.perf_counter() < response_end:
@@ -406,11 +448,10 @@ def run_neuroconn_gvs_node(
                 if polled is not None:
                     response_dir = polled
                     rt_ms = int((time.perf_counter() - response_t0) * 1000)
-                    # Trigger 8 au moment exact de la réponse (pas après le MP3)
-                    gvs_lsl.response_perceived(
-                        response_dir,
-                        correct=None if condition == "CONTROL" else response_dir == condition,
-                    )
+                    extra = response_dir
+                    if condition != "CONTROL":
+                        extra += "_correct" if response_dir == condition else "_incorrect"
+                    _emit_trigger(session, node, triggers, "response", extra=extra)
                     break
                 remaining = max(0.0, response_end - time.perf_counter())
                 _draw_fixation(
@@ -475,12 +516,12 @@ def run_neuroconn_gvs_node(
 
         if trial_i < len(trials) - 1:
             iti = _iti_duration_s(iti_base, iti_jitter, rng)
-            gvs_lsl.iti_start(iti)
+            _emit_trigger(session, node, triggers, "iti", extra=f"{iti:.2f}s")
             if _wait_seconds(iti, screen, clock, font, w, h, title="Pause", hint="ITI"):
                 _abort(trial_i)
                 return
 
-    gvs_lsl.push(gvs_lsl.GVS_BLOCK_END, label="gvs_block_end")
+    _emit_trigger(session, node, triggers, "block_end")
     session.log_event(
         "node_end",
         node_id=node.node_id,
