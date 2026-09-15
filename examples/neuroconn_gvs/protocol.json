@@ -43,6 +43,13 @@
       "engine": "pygame",
       "params": {
         "amplitude": 1.2,
+        "amplitudes": {
+          "AP": 1.2,
+          "PA": 1.2,
+          "LATG": 1.2,
+          "LATD": 1.2,
+          "CONTROL": 1.2
+        },
         "repetitions_per_condition": 10,
         "conditions": ["AP", "PA", "LATG", "LATD", "CONTROL"],
         "rise_s": 3.0,

@@ -259,6 +259,21 @@ Fin bloc                     → trigger 1
 
 Sous-ensemble possible via `params.conditions` (ex. `["AP", "PA", "CONTROL"]`).
 
+Intensité (tension NI, V) **par condition** dans `params.amplitudes` — `amplitude` reste le repli :
+
+```json
+"amplitude": 1.2,
+"amplitudes": {
+  "AP": 1.2,
+  "PA": 1.2,
+  "LATG": 0.9,
+  "LATD": 0.9,
+  "CONTROL": 1.2
+}
+```
+
+Une condition absente de `amplitudes` utilise `amplitude`. L’essai logue la valeur réellement envoyée (`gvs_trial_start` / `gvs_trial_end` → `payload.amplitude`).
+
 ---
 
 ## Marqueurs LSL
@@ -311,6 +326,7 @@ Forme d’onde **trapèze 10 s** (≠ onde carré Alba) :
 
 - **Canaux** : `ao0`, `ao1` (matrice 2×N, style Alba)
 - **Amplitude** : `1.2` V par défaut (`params.amplitude`) — à calibrer en mA côté NeuroConn
+- **Par condition** : `params.amplitudes` (V) surcharge le défaut, une clé par direction
 - **Fréquence d’échantillonnage** : 400 Hz
 - **ITI** : 10 s + jitter uniforme [1, 5] s
 
@@ -396,7 +412,8 @@ Paramètres principaux (`gvs_block` → `params`) :
 
 | Paramètre | Défaut | Description |
 |-----------|--------|-------------|
-| `amplitude` | `1.2` | Amplitude rampe (V) |
+| `amplitude` | `1.2` | Amplitude rampe par défaut (V) |
+| `amplitudes` | copie du défaut | Intensité (V) par condition ; clé absente → `amplitude` |
 | `repetitions_per_condition` | `10` | Essais par condition |
 | `conditions` | les 5 | Sous-ensemble : `AP`, `PA`, `LATG`, `LATD`, `CONTROL` |
 | `rise_s` / `plateau_s` / `fall_s` | 3 / 4 / 3 | Forme trapèze (s) |

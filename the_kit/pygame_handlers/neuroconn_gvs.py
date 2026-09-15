@@ -6,6 +6,7 @@ Bloc GVS NeuroConn + fNIRS — baseline, rampe 10 s, réponse après consigne au
 
 from __future__ import annotations
 
+import math
 import random
 import threading
 import time
@@ -50,6 +51,40 @@ def _normalize_conditions(raw: Any) -> list[str]:
         if name not in seen:
             out.append(name)
             seen.add(name)
+    return out
+
+
+def _normalize_amplitudes(
+    raw: Any,
+    *,
+    default: float,
+    conditions: list[str],
+) -> dict[str, float]:
+    """Amplitude (V) par condition : ``amplitudes`` surcharge ``amplitude``."""
+    out = {c: float(default) for c in conditions}
+    if raw is None:
+        return out
+    if not isinstance(raw, dict):
+        raise ValueError(
+            f"amplitudes invalides (attendu objet condition → V) : {raw!r}"
+        )
+    for key, value in raw.items():
+        name = str(key).strip().upper()
+        if name not in GVS_CONDITIONS:
+            raise ValueError(
+                f"amplitudes : condition inconnue {key!r} — "
+                f"autorisées : {', '.join(GVS_CONDITIONS)}"
+            )
+        try:
+            amp = float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                f"amplitudes[{key!r}] : nombre attendu, reçu {value!r}"
+            ) from exc
+        if not math.isfinite(amp):
+            raise ValueError(f"amplitudes[{key!r}] : valeur non finie {value!r}")
+        if name in out:
+            out[name] = amp
     return out
 
 
@@ -266,6 +301,11 @@ def run_neuroconn_gvs_node(
     seed = p.get("random_seed")
     rng = random.Random(seed)
     conditions = _normalize_conditions(p.get("conditions"))
+    amplitudes = _normalize_amplitudes(
+        p.get("amplitudes"),
+        default=amplitude,
+        conditions=conditions,
+    )
     auto_respond = bool(p.get("auto_respond", False))
     skip_sounds = bool(p.get("skip_sounds", False)) or auto_respond
     triggers = load_trigger_table(p)
@@ -299,6 +339,7 @@ def run_neuroconn_gvs_node(
         payload={
             "trials": len(trials),
             "amplitude": amplitude,
+            "amplitudes": amplitudes,
             "baseline_s": baseline_s,
             "response_window_s": response_window_s,
             "conditions": list(conditions),
@@ -355,13 +396,18 @@ def run_neuroconn_gvs_node(
         return
 
     for trial_i, condition in enumerate(trials):
+        trial_amp = amplitudes[condition]
         session.log_event(
             "gvs_trial_start",
             node_id=node.node_id,
             node_type=node.type,
             node_index=node.index,
             engine=node.engine,
-            payload={"trial": trial_i, "condition": condition},
+            payload={
+                "trial": trial_i,
+                "condition": condition,
+                "amplitude": trial_amp,
+            },
         )
 
         stim_meta: dict[str, Any] = {}
@@ -373,7 +419,7 @@ def run_neuroconn_gvs_node(
                 stim_meta.update(
                     nidaqmx_io.send_ramp_stim(
                         direction=condition,
-                        amplitude=amplitude,
+                        amplitude=trial_amp,
                         rise_s=rise_s,
                         plateau_s=plateau_s,
                         fall_s=fall_s,
@@ -505,6 +551,7 @@ def run_neuroconn_gvs_node(
             payload={
                 "trial": trial_i,
                 "condition": condition,
+                "amplitude": trial_amp,
                 "response": response_dir,
                 "rt_ms": rt_ms,
                 "correct": correct,

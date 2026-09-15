@@ -40,6 +40,10 @@
       "engine": "pygame",
       "params": {
         "amplitude": 1.2,
+        "amplitudes": {
+          "AP": 1.2,
+          "CONTROL": 1.2
+        },
         "repetitions_per_condition": 2,
         "conditions": ["AP", "CONTROL"],
         "rise_s": 3.0,

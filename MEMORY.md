@@ -321,6 +321,7 @@ python -m the_kit check-audio
 
 | Date | Fait | Suite |
 |------|------|-------|
+| 2026-09-15 | GVS : intensité NI par condition (`params.amplitudes`) | calibration oscillo / v1.0 |
 | 2026-05-22 | PRD v1.5 : `python_task` + TaskContext (style OpenSesame) | Phase 1 |
 | 2026-05-22 | PRD v1.4 : taxonomie visuelle §4.9 | — |
 | 2026-05-22 | PRD v1.3 : relecture complétude (§5.11–5.17, events.jsonl, …) | — |

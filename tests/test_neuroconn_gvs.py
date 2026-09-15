@@ -45,6 +45,47 @@ def test_unknown_condition_raises():
         _normalize_conditions(["AP", "FOO"])
 
 
+def test_amplitudes_per_condition():
+    from the_kit.pygame_handlers.neuroconn_gvs import _normalize_amplitudes
+
+    amps = _normalize_amplitudes(
+        {"AP": 1.5, "latg": 0.8, "CONTROL": 0.0},
+        default=1.2,
+        conditions=["AP", "PA", "LATG", "CONTROL"],
+    )
+    assert amps == {"AP": 1.5, "PA": 1.2, "LATG": 0.8, "CONTROL": 0.0}
+
+
+def test_amplitudes_unknown_condition_raises():
+    from the_kit.pygame_handlers.neuroconn_gvs import _normalize_amplitudes
+    import pytest
+
+    with pytest.raises(ValueError, match="inconnue"):
+        _normalize_amplitudes({"FOO": 1.0}, default=1.2, conditions=["AP"])
+
+
+def test_amplitudes_invalid_value_raises():
+    from the_kit.pygame_handlers.neuroconn_gvs import _normalize_amplitudes
+    import pytest
+
+    with pytest.raises(ValueError, match="nombre"):
+        _normalize_amplitudes({"AP": "fort"}, default=1.2, conditions=["AP"])
+
+
+def test_protocol_json_declares_amplitudes():
+    from pathlib import Path
+
+    from the_kit.protocol.loader import load_protocol
+
+    root = Path(__file__).resolve().parents[1]
+    p = load_protocol(root / "examples" / "neuroconn_gvs" / "protocol.json")
+    gvs = next(n for n in p.nodes if n.type == "neuroconn_gvs")
+    amps = gvs.params["amplitudes"]
+    for cond in ("AP", "PA", "LATG", "LATD", "CONTROL"):
+        assert cond in amps
+        assert isinstance(amps[cond], (int, float))
+
+
 def test_lsl_codes():
     assert GVS_CONDITION_CODES["AP"] == 2
     assert GVS_CONDITION_CODES["PA"] == 3
