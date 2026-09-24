@@ -185,7 +185,13 @@ def generate_trapezoid_ramp(
         import random
 
         r = rng if rng is not None else random
-        r.shuffle(wave)
+        # Mélanger le contenu sans casser le retour à 0 V : la carte NI
+        # conserve le dernier échantillon AO après un write FINITE + stop.
+        if len(wave) > 2:
+            mid = wave[1:-1]
+            r.shuffle(mid)
+            wave = [wave[0]] + mid + [wave[-1]]
+        # wave[0] et wave[-1] restent 0.0 (montée/descente du trapèze)
     return wave
 
 

@@ -253,7 +253,7 @@ Fin bloc                     → trigger 1
 | **PA** | Arrière (↓) | **3** |
 | **LATG** | Gauche (←) | **4** |
 | **LATD** | Droite (→) | **5** |
-| **CONTROL** | Rampe mélangée (pas de « bonne » réponse) | **6** |
+| **CONTROL** | Rampe mélangée (pas de « bonne » réponse) ; début/fin forcés à **0 V** | **6** |
 
 10 répétitions par condition, ordre mélangé (`random_seed` dans le JSON).
 

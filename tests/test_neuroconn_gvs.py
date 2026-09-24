@@ -17,6 +17,27 @@ def test_control_shuffle_changes_order():
     )
     assert sorted(base) == sorted(shuffled)
     assert base != shuffled
+    # CRITICAL : AO NI holds last sample — CONTROL must end (and start) at 0 V
+    assert base[0] == 0.0 and base[-1] == 0.0
+    assert shuffled[0] == 0.0 and shuffled[-1] == 0.0
+
+
+def test_control_stim_ends_at_zero():
+    """CONTROL shuffled waveform must return to 0 so NeuroConn is not left biased."""
+    import random
+
+    for seed in range(20):
+        wave = nidaqmx_io.generate_trapezoid_ramp(
+            1.2,
+            rise_s=3.0,
+            plateau_s=4.0,
+            fall_s=3.0,
+            sampling_rate=400,
+            shuffle=True,
+            rng=random.Random(seed),
+        )
+        assert wave[0] == 0.0, f"seed={seed} start={wave[0]}"
+        assert wave[-1] == 0.0, f"seed={seed} end={wave[-1]}"
 
 
 def test_fifty_trials():
