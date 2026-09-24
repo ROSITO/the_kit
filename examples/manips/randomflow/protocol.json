@@ -1,0 +1,56 @@
+{
+  "protocol_version": "1.0",
+  "name": "manip_randomflow",
+  "description": "Flux optique B/M (randomflow).",
+  "loop": 1,
+  "nodes": [
+    {
+      "id": "consent",
+      "type": "consent",
+      "engine": "qt",
+      "params": {
+        "text": "Consentement — flux optique.",
+        "key": "space"
+      }
+    },
+    {
+      "id": "instr",
+      "type": "instructions",
+      "engine": "qt",
+      "params": {
+        "text": "B = bruit · M = mouvement cohérent",
+        "duration_s": 5
+      }
+    },
+    {
+      "id": "fix",
+      "type": "fixation",
+      "engine": "psychopy",
+      "params": {
+        "text": "+",
+        "duration_s": 0.8
+      }
+    },
+    {
+      "id": "flow",
+      "type": "optic_flow",
+      "engine": "pygame",
+      "params": {
+        "dot_number": 200,
+        "dot_coherence": 0.8,
+        "duration_s": 8,
+        "key_noise": "b",
+        "key_motion": "m"
+      }
+    },
+    {
+      "id": "debrief",
+      "type": "debrief",
+      "engine": "qt",
+      "params": {
+        "text": "Fin randomflow (stub).",
+        "key": "space"
+      }
+    }
+  ]
+}

@@ -39,10 +39,11 @@ prd: PRD.md v1.5
 | `the_kit/io/` | `lsl.py`, `eyelink.py` |
 | `the_kit/pygame_handlers/` | occultation, shadow_ball, mot |
 | `the_kit/designer/` | concepteur Qt v1 |
+| `examples/manips/` | **16 dossiers** additifs ; extrapolation Time/Chrono/Tone **interactive + PortAudio + N=15** (`the_kit.manips.extrapolation`) |
 | Tests | `pytest` — 23 tests |
 | GitHub remote | à créer / lier si besoin |
 
-**Prochaine action** : calibration oscilloscope ([doc_calibration.md](./doc_calibration.md)) ; tag `v1.0.0` MVP.
+**Prochaine action** : réconcilier inventaire manips avec Word collaborateur ; calibration oscilloscope ([doc_calibration.md](./doc_calibration.md)) ; tag `v1.0.0` MVP.
 
 ### Commandes (uv)
 
@@ -321,6 +322,9 @@ python -m the_kit check-audio
 
 | Date | Fait | Suite |
 |------|------|-------|
+| 2026-09-24 | Extrapolation : pygame interactif, Tone sounddevice, secondary 1/2, prompt_launch, N=15 ; tests 38 | mini-pilote Tone terrain |
+| 2026-09-24 | Extrapolation Time/Chrono/Tone exécutable (dry-run) + **restauration additive** des 13 stubs labo | fidélité interactive / audio réel |
+| 2026-09-24 | Réconciliation Word manips v2 : 3 manips (Time/Chrono/Tone) + stubs `examples/manips/` | implémenter boucles essais + stimuli Chrono/Tone |
 | 2026-09-15 | GVS : intensité NI par condition (`params.amplitudes`) | calibration oscillo / v1.0 |
 | 2026-05-22 | PRD v1.5 : `python_task` + TaskContext (style OpenSesame) | Phase 1 |
 | 2026-05-22 | PRD v1.4 : taxonomie visuelle §4.9 | — |

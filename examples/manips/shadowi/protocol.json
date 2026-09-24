@@ -1,0 +1,51 @@
+{
+  "protocol_version": "1.0",
+  "name": "manip_shadowi",
+  "description": "Shadowi — balle + ombre.",
+  "loop": 1,
+  "nodes": [
+    {
+      "id": "instr",
+      "type": "instructions",
+      "engine": "qt",
+      "params": {
+        "text": "Suivez la balle / ombre (shadowi stub).",
+        "duration_s": 4
+      }
+    },
+    {
+      "id": "shadow_cong",
+      "type": "shadow_ball",
+      "engine": "pygame",
+      "params": {
+        "shadow_mode": "congruent",
+        "fixation_duration_s": 3.0,
+        "ball_traverse_time_s": 1.0,
+        "run_baseline_pair": true,
+        "room_depth": 2.2,
+        "center_crossings": 2
+      }
+    },
+    {
+      "id": "shadow_incong",
+      "type": "shadow_ball",
+      "engine": "pygame",
+      "params": {
+        "shadow_mode": "incongruent",
+        "fixation_duration_s": 3.0,
+        "ball_traverse_time_s": 1.0,
+        "run_baseline_pair": false,
+        "room_depth": 2.2
+      }
+    },
+    {
+      "id": "debrief",
+      "type": "debrief",
+      "engine": "qt",
+      "params": {
+        "text": "Fin shadowi (stub).",
+        "key": "space"
+      }
+    }
+  ]
+}

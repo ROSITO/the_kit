@@ -1,0 +1,34 @@
+{
+  "protocol_version": "1.0",
+  "name": "manip_nombre_chirurgie",
+  "description": "Chrono — chirurgie éveillée.",
+  "loop": 1,
+  "meta": {
+    "paper_name": "Chrono",
+    "version": "chirurgie_eveillee"
+  },
+  "nodes": [
+    {
+      "id": "chirurgie_block",
+      "type": "python_task",
+      "engine": "python",
+      "params": {
+        "script": {
+          "file": "scripts/run_chirurgie.py",
+          "prepare": "prepare",
+          "run": "run",
+          "args": {
+            "temps_court_s": 0.95,
+            "temps_long_s": 1.85,
+            "n_zones": 2,
+            "n_essais_par_condition": 15,
+            "secondary_option": 0,
+            "initial_value": 1000,
+            "increment_per_s": 10,
+            "prompt_launch": true
+          }
+        }
+      }
+    }
+  ]
+}

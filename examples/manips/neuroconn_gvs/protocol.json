@@ -1,0 +1,74 @@
+{
+  "protocol_version": "1.0",
+  "name": "manip_neuroconn_gvs",
+  "description": "GVS NeuroConn + fNIRS (stub ; complet dans examples/neuroconn_gvs/).",
+  "loop": 1,
+  "audio_defaults": {
+    "timing_mode": "low_latency",
+    "blocksize": 128
+  },
+  "lsl": {
+    "enabled": true,
+    "stream_name": "Trigger",
+    "stream_type": "Markers",
+    "channel_count": 1,
+    "channel_format": "int32",
+    "source_id": "the_kit_gvs",
+    "auto_markers": false
+  },
+  "ni_daq": {
+    "enabled": true,
+    "simulation_mode": true,
+    "device": "Dev1",
+    "channels": [
+      "ao0",
+      "ao1"
+    ],
+    "rate": 400,
+    "min_val": -10.0,
+    "max_val": 10.0
+  },
+  "nodes": [
+    {
+      "id": "instr",
+      "type": "instructions",
+      "engine": "qt",
+      "params": {
+        "text": "GVS NeuroConn (stub simulation). Complet : examples/neuroconn_gvs/",
+        "duration_s": 5,
+        "key": "space"
+      }
+    },
+    {
+      "id": "gvs_block",
+      "type": "neuroconn_gvs",
+      "engine": "pygame",
+      "params": {
+        "amplitude": 1.2,
+        "repetitions_per_condition": 1,
+        "conditions": [
+          "AP",
+          "PA",
+          "CONTROL"
+        ],
+        "rise_s": 1.0,
+        "plateau_s": 1.0,
+        "fall_s": 1.0,
+        "baseline_s": 2.0,
+        "response_window_s": 3.0,
+        "iti_base_s": 1.0,
+        "iti_jitter_s": [
+          0.2,
+          0.5
+        ],
+        "random_seed": 42,
+        "sounds": {
+          "debut_dexpe": "debut_dexpe.mp3",
+          "vous_pouvez_repondre": "vous_pouvez_repondre.mp3",
+          "votre_reponse": "Votre_reponse.mp3",
+          "fin_du_temps": "fin_du_temps.mp3"
+        }
+      }
+    }
+  ]
+}

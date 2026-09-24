@@ -1,0 +1,39 @@
+{
+  "protocol_version": "1.0",
+  "name": "manip_shadow_corridor_mot",
+  "description": "Composite couloir ombre + MOT (pygame_scene).",
+  "loop": 1,
+  "nodes": [
+    {
+      "id": "instr",
+      "type": "instructions",
+      "engine": "qt",
+      "params": {
+        "text": "MOT dans couloir d'ombre.",
+        "duration_s": 4
+      }
+    },
+    {
+      "id": "scene",
+      "type": "pygame_scene",
+      "engine": "pygame",
+      "params": {
+        "background": "shadow_corridor",
+        "background_params": {
+          "room_depth": 2.2
+        },
+        "duration_s": 15,
+        "stimuli": [
+          {
+            "type": "mot",
+            "num_balls": 8,
+            "duration_s": 15,
+            "keyhole": true,
+            "keyhole_radius": 120,
+            "uniform_speed": 3.0
+          }
+        ]
+      }
+    }
+  ]
+}
