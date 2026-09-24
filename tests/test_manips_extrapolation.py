@@ -75,8 +75,14 @@ def test_lab_trials_count_production():
     assert len(trials) == len(DEFAULT_DELTA_TIMES_S) * 15
 
 
-def test_smoke_cap():
+def test_smoke_cap(monkeypatch):
+    monkeypatch.delenv("THE_KIT_EXTRAPOLATION_SMOKE", raising=False)
+    monkeypatch.delenv("THE_KIT_EXTRAPOLATION_FULL_N", raising=False)
     assert _smoke_cap_n(15, dry_run=True) == 1
+    assert _smoke_cap_n(15, dry_run=False) == 15
+    monkeypatch.setenv("THE_KIT_EXTRAPOLATION_SMOKE", "1")
+    assert _smoke_cap_n(15, dry_run=False) == 1
+    monkeypatch.setenv("THE_KIT_EXTRAPOLATION_FULL_N", "1")
     assert _smoke_cap_n(15, dry_run=False) == 15
 
 
