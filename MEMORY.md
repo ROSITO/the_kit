@@ -39,7 +39,7 @@ prd: PRD.md v1.5
 | `the_kit/io/` | `lsl.py`, `eyelink.py` |
 | `the_kit/pygame_handlers/` | occultation, shadow_ball, mot |
 | `the_kit/designer/` | concepteur Qt v1 |
-| `examples/manips/` | **16 dossiers** : 13 stubs labo + 3 papier (Time/Chrono/Tone × lab+chirurgie) ; moteur `the_kit.manips.extrapolation` |
+| `examples/manips/` | **16 dossiers** additifs ; extrapolation Time/Chrono/Tone **interactive + PortAudio + N=15** (`the_kit.manips.extrapolation`) |
 | Tests | `pytest` — 23 tests |
 | GitHub remote | à créer / lier si besoin |
 
@@ -322,6 +322,7 @@ python -m the_kit check-audio
 
 | Date | Fait | Suite |
 |------|------|-------|
+| 2026-09-24 | Extrapolation : pygame interactif, Tone sounddevice, secondary 1/2, prompt_launch, N=15 ; tests 38 | mini-pilote Tone terrain |
 | 2026-09-24 | Extrapolation Time/Chrono/Tone exécutable (dry-run) + **restauration additive** des 13 stubs labo | fidélité interactive / audio réel |
 | 2026-09-24 | Réconciliation Word manips v2 : 3 manips (Time/Chrono/Tone) + stubs `examples/manips/` | implémenter boucles essais + stimuli Chrono/Tone |
 | 2026-09-15 | GVS : intensité NI par condition (`params.amplitudes`) | calibration oscillo / v1.0 |
