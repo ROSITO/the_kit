@@ -21,9 +21,9 @@
             "temps_court_s": 0.95,
             "temps_long_s": 1.85,
             "n_zones": 2,
-            "n_essais_par_condition": 1,
+            "n_essais_par_condition": 15,
             "secondary_option": 0,
-            "prompt_launch": false
+            "prompt_launch": true
           }
         }
       }

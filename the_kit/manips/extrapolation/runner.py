@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import random
 from pathlib import Path
@@ -20,13 +21,20 @@ from the_kit.manips.extrapolation.planning import (
     build_lab_trials,
     expected_side,
 )
-from the_kit.manips.extrapolation.secondary import run_secondary_mock, run_secondary_pygame
+from the_kit.manips.extrapolation.secondary import (
+    SecondaryResult,
+    run_change_detection_post,
+    run_change_detection_pre,
+    run_secondary_mock,
+)
 from the_kit.manips.extrapolation.stimuli import (
+    auto_input_enabled,
     run_chrono_pygame,
     run_time_pygame,
+    run_tone_pygame,
+    run_tone_trial,
     simulate_chrono_trial,
     simulate_time_trial,
-    simulate_tone_trial,
 )
 from the_kit.manips.extrapolation.trials_csv import append_trial_row, init_trials_csv
 from the_kit.task_api import NodeResult
@@ -40,23 +48,36 @@ MANIP_LABELS = {
     "tone": "son",
 }
 
+# Papier : N=15 essais / condition unique
+PAPER_TRIALS_PER_CONDITION = 15
+
 
 def _use_mock(ctx: TaskContext) -> bool:
     if ctx.dry_run:
         return True
-    if os.environ.get("THE_KIT_EXTRAPOLATION_MOCK", "").strip() in ("1", "true", "yes"):
+    if os.environ.get("THE_KIT_EXTRAPOLATION_MOCK", "").strip().lower() in ("1", "true", "yes"):
         return True
-    if os.environ.get("SDL_VIDEODRIVER", "").lower() == "dummy":
-        # dummy OK for pygame; still allow interactive path if pygame present
-        pass
     return False
 
 
+def _smoke_cap_n(n: int, *, dry_run: bool) -> int:
+    """Dry-run / SMOKE : plafonne N pour tests rapides ; production = 15."""
+    if os.environ.get("THE_KIT_EXTRAPOLATION_FULL_N", "").strip().lower() in ("1", "true", "yes"):
+        return max(1, n)
+    if dry_run or os.environ.get("THE_KIT_EXTRAPOLATION_SMOKE", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+    ):
+        return 1
+    return max(1, n)
+
+
 def _want_pygame(ctx: TaskContext) -> bool:
-    if _use_mock(ctx):
-        return False
-    if os.environ.get("THE_KIT_EXTRAPOLATION_MOCK", "").strip() in ("1", "true", "yes"):
-        return False
+    if _use_mock(ctx) and not auto_input_enabled():
+        # mock pur sans auto-input → pas de pygame
+        if os.environ.get("THE_KIT_EXTRAPOLATION_FORCE_PYGAME", "").strip() not in ("1", "true"):
+            return False
     try:
         import pygame  # noqa: F401
 
@@ -69,46 +90,76 @@ def _script_args(ctx: TaskContext) -> dict[str, Any]:
     return dict(ctx.node.params.get("script", {}).get("args") or {})
 
 
-def _prompt_chirurgie_args(args: dict[str, Any], *, interactive: bool) -> dict[str, Any]:
-    """Questions lancement chirurgie — interactif si demandé, sinon JSON args."""
+def _prompt_chirurgie_args(
+    args: dict[str, Any],
+    *,
+    interactive: bool,
+    input_fn=None,
+) -> dict[str, Any]:
+    """Questions lancement chirurgie.
+
+    - interactive + TTY : input()
+    - THE_KIT_CHIRURGIE_ANSWERS='{"temps_court_s":0.9,...}' pour tests / batch
+    """
     out = {
         "temps_court_s": float(args.get("temps_court_s", 0.95)),
         "temps_long_s": float(args.get("temps_long_s", 1.85)),
         "n_zones": int(args.get("n_zones", 2)),
-        "n_essais_par_condition": int(args.get("n_essais_par_condition", 1)),
+        "n_essais_par_condition": int(args.get("n_essais_par_condition", PAPER_TRIALS_PER_CONDITION)),
         "secondary_option": int(args.get("secondary_option", 0)),
     }
+    env_raw = os.environ.get("THE_KIT_CHIRURGIE_ANSWERS", "").strip()
+    if env_raw:
+        try:
+            payload = json.loads(env_raw)
+            for k in out:
+                if k in payload:
+                    out[k] = type(out[k])(payload[k])
+            out["_source"] = "env"
+            return out
+        except json.JSONDecodeError:
+            pass
+
     if not interactive:
+        out["_source"] = "protocol_args"
         return out
-    print("=== Chirurgie éveillée — paramètres ===")
+
+    ask = input_fn or input
+    print("=== Chirurgie éveillée — paramètres de lancement ===")
     for key, cast, label in (
         ("temps_court_s", float, "Temps court (s)"),
         ("temps_long_s", float, "Temps long (s)"),
         ("n_zones", int, "Nombre de zones stimulées"),
         ("n_essais_par_condition", int, "Essais par condition"),
+        ("secondary_option", int, "Option secondaire (0/1/2)"),
     ):
-        raw = input(f"{label} [{out[key]}]: ").strip()
+        raw = ask(f"{label} [{out[key]}]: ").strip()
         if raw:
             out[key] = cast(raw)
+    out["_source"] = "prompt"
     return out
 
 
 def _init_pygame():
-    import os
-
     import pygame
 
     if not pygame.get_init():
-        # headless CI: allow SDL_VIDEODRIVER=dummy
-        os.environ.setdefault("SDL_VIDEODRIVER", os.environ.get("SDL_VIDEODRIVER", "dummy"))
+        # headless : SDL_VIDEODRIVER=dummy
+        if not os.environ.get("SDL_VIDEODRIVER"):
+            # ne force pas dummy si un vrai display peut exister
+            pass
         try:
             pygame.init()
         except pygame.error:
+            os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
             pygame.init()
     info = pygame.display.Info()
     w = min(960, getattr(info, "current_w", 960) or 960)
     h = min(540, getattr(info, "current_h", 540) or 540)
+    if w <= 0 or h <= 0:
+        w, h = 960, 540
     screen = pygame.display.set_mode((w, h))
+    pygame.display.set_caption("The Kit — extrapolation")
     clock = pygame.time.Clock()
     return pygame, screen, clock
 
@@ -122,28 +173,34 @@ def _run_one_trial(
     mock: bool,
     pygame_state: tuple | None,
 ) -> dict[str, Any]:
-    use_pg = pygame_state is not None and not mock
-    secondary = None
-    if use_pg and trial.secondary_option in (1, 2):
-        _pygame, screen, clock = pygame_state
-        secondary = run_secondary_pygame(
-            trial.secondary_option,
-            screen=screen,
-            clock=clock,
-            mask_duration_s=trial.mask_duration_s,
-        )
-    else:
-        secondary = run_secondary_mock(trial.secondary_option, rng=random.Random(trial.trial_index))
+    use_pg = pygame_state is not None and (not mock or auto_input_enabled())
+    secondary = SecondaryResult()
+    cd_state = None
+
+    # Option 2 pré-flash
+    if trial.secondary_option == 2:
+        if use_pg:
+            _pg, screen, clock = pygame_state
+            flash = 0.05 if auto_input_enabled() or mock else 0.5
+            cd_state = run_change_detection_pre(screen, clock, flash_s=flash)
+        else:
+            secondary = run_secondary_mock(2, rng=random.Random(trial.trial_index))
+
+    play_audio = bool(args.get("play_audio", True)) and not mock and not ctx.dry_run
 
     if modality == "time":
         if use_pg:
-            _pygame, screen, clock = pygame_state
+            _pg, screen, clock = pygame_state
             outcome = run_time_pygame(trial, screen=screen, clock=clock)
+            if trial.secondary_option == 1 and outcome.secondary:
+                secondary = outcome.secondary
         else:
-            outcome = simulate_time_trial(trial)
+            if trial.secondary_option == 1:
+                secondary = run_secondary_mock(1, rng=random.Random(trial.trial_index))
+            outcome = simulate_time_trial(trial, secondary=secondary)
     elif modality == "chrono":
         if use_pg:
-            _pygame, screen, clock = pygame_state
+            _pg, screen, clock = pygame_state
             outcome = run_chrono_pygame(
                 trial,
                 screen=screen,
@@ -152,21 +209,60 @@ def _run_one_trial(
                 increment_per_s=float(args.get("increment_per_s", 10)),
                 pre_mask_s=float(args.get("pre_mask_s", 1.0)),
             )
+            if trial.secondary_option == 1 and outcome.secondary:
+                secondary = outcome.secondary
         else:
+            if trial.secondary_option == 1:
+                secondary = run_secondary_mock(1, rng=random.Random(trial.trial_index))
             outcome = simulate_chrono_trial(
                 trial,
                 initial_value=float(args.get("initial_value", 1000)),
                 increment_per_s=float(args.get("increment_per_s", 10)),
                 pre_mask_s=float(args.get("pre_mask_s", 1.0)),
+                secondary=secondary,
             )
-    else:
-        outcome = simulate_tone_trial(
-            trial,
-            f0_hz=float(args.get("f0_hz", TONE_F0_HZ)),
-            rise_semitones_per_s=float(args.get("rise_semitones_per_s", TONE_RISE_SEMITONES_PER_S)),
-            pre_mask_s=float(args.get("pre_mask_s", 1.0)),
-            mock_audio=mock or not bool(args.get("play_audio", False)),
+    else:  # tone
+        if use_pg:
+            _pg, screen, clock = pygame_state
+            if trial.secondary_option == 1:
+                from the_kit.manips.extrapolation.secondary import run_green_circle_during
+
+                dur = 0.05 if (auto_input_enabled() or mock) else float(trial.mask_duration_s)
+                secondary = run_green_circle_during(screen, clock, duration_s=dur)
+            outcome = run_tone_pygame(
+                trial,
+                screen=screen,
+                clock=clock,
+                f0_hz=float(args.get("f0_hz", TONE_F0_HZ)),
+                rise_semitones_per_s=float(args.get("rise_semitones_per_s", TONE_RISE_SEMITONES_PER_S)),
+                pre_mask_s=float(args.get("pre_mask_s", 1.0)),
+                mock_audio=not play_audio,
+                secondary=secondary,
+            )
+        else:
+            if trial.secondary_option == 1:
+                secondary = run_secondary_mock(1, rng=random.Random(trial.trial_index))
+            outcome = run_tone_trial(
+                trial,
+                f0_hz=float(args.get("f0_hz", TONE_F0_HZ)),
+                rise_semitones_per_s=float(args.get("rise_semitones_per_s", TONE_RISE_SEMITONES_PER_S)),
+                pre_mask_s=float(args.get("pre_mask_s", 1.0)),
+                mock_audio=not play_audio,
+                secondary=secondary,
+            )
+
+    # Option 2 post
+    if trial.secondary_option == 2 and cd_state is not None and use_pg:
+        _pg, screen, clock = pygame_state
+        secondary = run_change_detection_post(
+            screen,
+            clock,
+            cd_state,
+            auto=auto_input_enabled() or mock,
         )
+
+    if outcome.secondary and trial.secondary_option == 1:
+        secondary = outcome.secondary
 
     exp = expected_side(modality, trial.delta_time_s)
     correct = None if exp == "exact" else (outcome.response == exp)
@@ -175,7 +271,7 @@ def _run_one_trial(
         "secondary": secondary,
         "expected_side": exp,
         "correct": correct,
-        "mock": mock or not use_pg,
+        "mock": mock and not use_pg,
     }
 
 
@@ -231,6 +327,7 @@ def _write_and_log_trial(
         response=outcome.response,
         rt_ms=outcome.rt_ms,
         secondary_option=trial.secondary_option,
+        secondary_responded=secondary.responded,
         mock=result["mock"],
     )
 
@@ -238,9 +335,13 @@ def _write_and_log_trial(
 def run_lab_block(ctx: TaskContext, *, modality: Modality) -> NodeResult:
     args = _script_args(ctx)
     deltas = args.get("delta_times_s") or list(DEFAULT_DELTA_TIMES_S)
+    n_req = int(args.get("trials_per_condition", PAPER_TRIALS_PER_CONDITION))
+    n = _smoke_cap_n(n_req, dry_run=ctx.dry_run)
+    ctx.variables["trials_per_condition_requested"] = n_req
+    ctx.variables["trials_per_condition_effective"] = n
     trials = build_lab_trials(
         delta_times_s=list(deltas),
-        trials_per_condition=int(args.get("trials_per_condition", 1)),
+        trials_per_condition=n,
         secondary_option=int(args.get("secondary_option", 0)),
         mask_duration_s=float(args.get("mask_duration_s", NOMINAL_MASK_S)),
         modality=modality,
@@ -250,20 +351,28 @@ def run_lab_block(ctx: TaskContext, *, modality: Modality) -> NodeResult:
 
 def run_chirurgie_block(ctx: TaskContext, *, modality: Modality) -> NodeResult:
     args = _script_args(ctx)
-    interactive = bool(args.get("prompt_launch", False)) and not ctx.dry_run and not _use_mock(ctx)
+    # prompt_launch défaut True pour chirurgie ; dry-run / mock → args JSON ou env
+    want_prompt = bool(args.get("prompt_launch", True))
+    interactive = want_prompt and not ctx.dry_run and not _use_mock(ctx)
     carg = _prompt_chirurgie_args(args, interactive=interactive)
     args.update(carg)
+    n_req = int(carg["n_essais_par_condition"])
+    n = _smoke_cap_n(n_req, dry_run=ctx.dry_run)
+    carg["n_essais_par_condition"] = n
     trials = build_chirurgie_trials(
         temps_court_s=float(carg["temps_court_s"]),
         temps_long_s=float(carg["temps_long_s"]),
         n_zones=int(carg["n_zones"]),
-        n_essais_par_condition=int(carg["n_essais_par_condition"]),
+        n_essais_par_condition=n,
         secondary_option=int(carg.get("secondary_option", args.get("secondary_option", 0))),
         modality=modality,
         mask_duration_s=float(args.get("mask_duration_s", NOMINAL_MASK_S)),
     )
-    ctx.variables["chirurgie_params"] = carg
+    ctx.variables["chirurgie_params"] = {k: v for k, v in carg.items() if not str(k).startswith("_")}
+    ctx.variables["chirurgie_prompt_source"] = carg.get("_source")
     ctx.variables["chirurgie_plan"] = [t.as_dict() for t in trials]
+    ctx.variables["trials_per_condition_requested"] = n_req
+    ctx.variables["trials_per_condition_effective"] = n
     return _execute_trials(ctx, modality=modality, version="chirurgie_eveillee", trials=trials, args=args)
 
 
@@ -276,15 +385,14 @@ def _execute_trials(
     args: dict[str, Any],
 ) -> NodeResult:
     mock = _use_mock(ctx)
-    # force mock if few resources
-    want_pg = _want_pygame(ctx) and modality in ("time", "chrono")
+    want_pg = _want_pygame(ctx)
+    # Tone aussi via pygame pour jugement écran
     pygame_state = None
-    if want_pg and not mock:
+    if want_pg:
         try:
             pygame_state = _init_pygame()
         except Exception as exc:
             ctx.log.event("extrapolation_pygame_fallback", error=str(exc))
-            mock = True
             pygame_state = None
 
     trials_path = Path(ctx.session.session_dir) / "trials.csv"
@@ -293,7 +401,7 @@ def _execute_trials(
     ctx.variables["version"] = version
     ctx.variables["n_trials"] = len(trials)
     ctx.variables["trials_csv"] = str(trials_path)
-    ctx.variables["mock"] = mock or pygame_state is None
+    ctx.variables["mock"] = mock and pygame_state is None
 
     ctx.log.event(
         "extrapolation_block_start",
@@ -301,6 +409,8 @@ def _execute_trials(
         version=version,
         n_trials=len(trials),
         mock=ctx.variables["mock"],
+        pygame=pygame_state is not None,
+        auto_input=auto_input_enabled(),
         args={k: args[k] for k in args if k != "delta_times_s"},
         delta_times_s=args.get("delta_times_s") or list(DEFAULT_DELTA_TIMES_S),
     )
@@ -311,7 +421,7 @@ def _execute_trials(
             modality=modality,
             trial=trial,
             args=args,
-            mock=ctx.variables["mock"],
+            mock=mock,
             pygame_state=pygame_state,
         )
         _write_and_log_trial(

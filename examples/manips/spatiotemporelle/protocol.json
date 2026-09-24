@@ -40,7 +40,7 @@
               1.85,
               2.1
             ],
-            "trials_per_condition": 1,
+            "trials_per_condition": 15,
             "secondary_option": 0,
             "nominal_mask_s": 1.5
           }

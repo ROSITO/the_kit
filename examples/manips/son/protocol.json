@@ -35,11 +35,11 @@
               2.1
             ],
             "mask_duration_s": 1.5,
-            "trials_per_condition": 1,
+            "trials_per_condition": 15,
             "secondary_option": 0,
             "f0_hz": 500,
             "rise_semitones_per_s": 2.0,
-            "play_audio": false
+            "play_audio": true
           }
         }
       }

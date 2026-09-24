@@ -25,12 +25,12 @@
             "temps_court_s": 0.95,
             "temps_long_s": 1.85,
             "n_zones": 2,
-            "n_essais_par_condition": 1,
+            "n_essais_par_condition": 15,
             "secondary_option": 0,
             "f0_hz": 500,
             "rise_semitones_per_s": 2.0,
-            "play_audio": false,
-            "prompt_launch": false
+            "play_audio": true,
+            "prompt_launch": true
           }
         }
       }

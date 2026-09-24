@@ -29,7 +29,7 @@
               2.1
             ],
             "mask_duration_s": 1.5,
-            "trials_per_condition": 1,
+            "trials_per_condition": 15,
             "secondary_option": 0,
             "initial_value": 1000,
             "increment_per_s": 10
