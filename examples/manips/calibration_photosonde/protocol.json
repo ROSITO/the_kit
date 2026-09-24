@@ -1,0 +1,59 @@
+{
+  "protocol_version": "1.0",
+  "name": "manip_calibration_photosonde",
+  "description": "Calibration terrain photosonde + flash A/V.",
+  "loop": 1,
+  "audio_defaults": {
+    "timing_mode": "low_latency",
+    "blocksize": 128
+  },
+  "nodes": [
+    {
+      "id": "instr",
+      "type": "instructions",
+      "engine": "qt",
+      "params": {
+        "text": "Calibration photosonde — voir doc_calibration.md",
+        "duration_s": 4
+      }
+    },
+    {
+      "id": "flash_1",
+      "type": "photosonde_square",
+      "engine": "psychopy",
+      "params": {
+        "duration_s": 0.05,
+        "size_norm": 0.12,
+        "pos_x": -0.85,
+        "pos_y": 0.85
+      }
+    },
+    {
+      "id": "blank",
+      "type": "blank",
+      "engine": "psychopy",
+      "params": {
+        "duration_s": 0.5
+      }
+    },
+    {
+      "id": "flash_2",
+      "type": "photosonde_square",
+      "engine": "psychopy",
+      "params": {
+        "duration_s": 0.05,
+        "size_norm": 0.12
+      }
+    },
+    {
+      "id": "av_cal",
+      "type": "av_sync",
+      "engine": "psychopy",
+      "timing_mode": "low_latency",
+      "params": {
+        "video": "assets/forward.mp4",
+        "audio": "assets/tone.wav"
+      }
+    }
+  ]
+}

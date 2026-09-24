@@ -1,0 +1,39 @@
+{
+  "protocol_version": "1.0",
+  "name": "manip_son_chirurgie",
+  "description": "Tone — chirurgie éveillée.",
+  "loop": 1,
+  "audio_defaults": {
+    "timing_mode": "low_latency",
+    "blocksize": 128
+  },
+  "meta": {
+    "paper_name": "Tone",
+    "version": "chirurgie_eveillee"
+  },
+  "nodes": [
+    {
+      "id": "chirurgie_block",
+      "type": "python_task",
+      "engine": "python",
+      "params": {
+        "script": {
+          "file": "scripts/run_chirurgie.py",
+          "prepare": "prepare",
+          "run": "run",
+          "args": {
+            "temps_court_s": 0.95,
+            "temps_long_s": 1.85,
+            "n_zones": 2,
+            "n_essais_par_condition": 1,
+            "secondary_option": 0,
+            "f0_hz": 500,
+            "rise_semitones_per_s": 2.0,
+            "play_audio": false,
+            "prompt_launch": false
+          }
+        }
+      }
+    }
+  ]
+}

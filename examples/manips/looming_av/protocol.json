@@ -1,0 +1,49 @@
+{
+  "protocol_version": "1.0",
+  "name": "manip_looming_av",
+  "description": "Looming / receding A/V.",
+  "loop": 1,
+  "audio_defaults": {
+    "timing_mode": "low_latency",
+    "blocksize": 128
+  },
+  "nodes": [
+    {
+      "id": "instr",
+      "type": "instructions",
+      "engine": "qt",
+      "params": {
+        "text": "Essais looming/receding. Médias dans assets/.",
+        "duration_s": 5
+      }
+    },
+    {
+      "id": "trial_loom",
+      "type": "av_sync",
+      "engine": "psychopy",
+      "timing_mode": "low_latency",
+      "params": {
+        "video": "assets/forward.mp4",
+        "audio": "assets/Looming.wav"
+      }
+    },
+    {
+      "id": "iti",
+      "type": "blank",
+      "engine": "psychopy",
+      "params": {
+        "duration_s": 0.5
+      }
+    },
+    {
+      "id": "trial_recede",
+      "type": "av_sync",
+      "engine": "psychopy",
+      "timing_mode": "low_latency",
+      "params": {
+        "video": "assets/forward.mp4",
+        "audio": "assets/Receding.wav"
+      }
+    }
+  ]
+}

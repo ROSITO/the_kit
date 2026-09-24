@@ -1,0 +1,80 @@
+{
+  "protocol_version": "1.0",
+  "name": "manip_arome",
+  "description": "Arôme — vidéo Qt + QCM + trigger série (régression labo).",
+  "loop": 1,
+  "nodes": [
+    {
+      "id": "consent",
+      "type": "consent",
+      "engine": "qt",
+      "params": {
+        "text": "Consentement — protocole Arôme (stub The Kit).",
+        "key": "space"
+      }
+    },
+    {
+      "id": "wait_start",
+      "type": "wait_key",
+      "engine": "qt",
+      "params": {
+        "key": "t",
+        "message": "Appuyez sur t pour démarrer"
+      }
+    },
+    {
+      "id": "instr",
+      "type": "instructions",
+      "engine": "qt",
+      "params": {
+        "text": "Vous allez voir une vidéo puis répondre à un questionnaire.",
+        "duration_s": 5
+      }
+    },
+    {
+      "id": "video_1",
+      "type": "video",
+      "engine": "qt",
+      "timing_mode": "standard",
+      "params": {
+        "file": "video/exemple.mp4",
+        "duration_s": 30
+      }
+    },
+    {
+      "id": "qcm_1",
+      "type": "questionnaire",
+      "engine": "qt",
+      "params": {
+        "question1": "Intensité",
+        "question2": "Agréabilité",
+        "echelle": [
+          "Pas du tout",
+          "2",
+          "3",
+          "4",
+          "5",
+          "Beaucoup"
+        ]
+      }
+    },
+    {
+      "id": "trig_1",
+      "type": "trigger",
+      "engine": "qt",
+      "params": {
+        "code": 1,
+        "port": "auto"
+      }
+    },
+    {
+      "id": "debrief",
+      "type": "debrief",
+      "engine": "qt",
+      "params": {
+        "text": "Fin de session Arôme (stub).",
+        "key": "space"
+      }
+    }
+  ]
+}

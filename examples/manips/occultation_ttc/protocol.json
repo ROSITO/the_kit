@@ -1,0 +1,27 @@
+{
+  "protocol_version": "1.0",
+  "name": "manip_occultation_ttc",
+  "description": "Occultation TTC Action (PsychoPy subprocess).",
+  "loop": 1,
+  "nodes": [
+    {
+      "id": "instr",
+      "type": "instructions",
+      "engine": "qt",
+      "params": {
+        "text": "TTC Action — script PsychoPy requis.",
+        "duration_s": 4
+      }
+    },
+    {
+      "id": "ttc",
+      "type": "occultation_ttc",
+      "engine": "psychopy",
+      "params": {
+        "script": "occ_action_psychopy.py",
+        "duration_s": 3,
+        "text": "TODO: placer occ_action_psychopy.py + matrice trajectoires"
+      }
+    }
+  ]
+}

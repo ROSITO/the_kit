@@ -1,0 +1,42 @@
+{
+  "protocol_version": "1.0",
+  "name": "manip_occultation",
+  "description": "Occultation / TTC basique (pygame).",
+  "loop": 1,
+  "nodes": [
+    {
+      "id": "instr",
+      "type": "instructions",
+      "engine": "qt",
+      "params": {
+        "text": "Occultation — estimez le moment de contact.",
+        "duration_s": 4
+      }
+    },
+    {
+      "id": "occ_trial",
+      "type": "occultation",
+      "engine": "pygame",
+      "params": {
+        "occultation_time": 1.5,
+        "ball_speed": 100,
+        "total_movement_time": 2.0,
+        "variation": 0.0,
+        "circle_option": 0,
+        "max_duration_s": 10
+      }
+    },
+    {
+      "id": "resp",
+      "type": "keyboard_response",
+      "engine": "pygame",
+      "params": {
+        "duration_s": 3,
+        "prompt": "Espace = réponse",
+        "keys": [
+          "space"
+        ]
+      }
+    }
+  ]
+}

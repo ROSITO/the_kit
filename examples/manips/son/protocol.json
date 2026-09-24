@@ -1,0 +1,48 @@
+{
+  "protocol_version": "1.0",
+  "name": "manip_son",
+  "description": "Tone / Auditive — labo.",
+  "loop": 1,
+  "audio_defaults": {
+    "timing_mode": "low_latency",
+    "blocksize": 128
+  },
+  "meta": {
+    "paper_name": "Tone",
+    "manip_label": "son",
+    "f0_hz": 500,
+    "rise_semitones_per_s": 2.0
+  },
+  "nodes": [
+    {
+      "id": "block",
+      "type": "python_task",
+      "engine": "python",
+      "params": {
+        "script": {
+          "file": "scripts/run_block.py",
+          "prepare": "prepare",
+          "run": "run",
+          "args": {
+            "delta_times_s": [
+              0.7,
+              0.95,
+              1.15,
+              1.3,
+              1.5,
+              1.6,
+              1.85,
+              2.1
+            ],
+            "mask_duration_s": 1.5,
+            "trials_per_condition": 1,
+            "secondary_option": 0,
+            "f0_hz": 500,
+            "rise_semitones_per_s": 2.0,
+            "play_audio": false
+          }
+        }
+      }
+    }
+  ]
+}

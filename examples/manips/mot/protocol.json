@@ -1,0 +1,50 @@
+{
+  "protocol_version": "1.0",
+  "name": "manip_mot",
+  "description": "Multiple Object Tracking (MOT).",
+  "loop": 1,
+  "nodes": [
+    {
+      "id": "instr",
+      "type": "instructions",
+      "engine": "qt",
+      "params": {
+        "text": "Suivez les cibles MOT.",
+        "duration_s": 4
+      }
+    },
+    {
+      "id": "fix",
+      "type": "fixation",
+      "engine": "psychopy",
+      "params": {
+        "text": "+",
+        "duration_s": 1.0
+      }
+    },
+    {
+      "id": "mot_trial",
+      "type": "mot",
+      "engine": "pygame",
+      "params": {
+        "num_balls": 8,
+        "duration_s": 10,
+        "keyhole": true,
+        "keyhole_radius": 120,
+        "uniform_speed": 3.0
+      }
+    },
+    {
+      "id": "resp",
+      "type": "keyboard_response",
+      "engine": "pygame",
+      "params": {
+        "duration_s": 5,
+        "prompt": "Indiquez les cibles (stub)",
+        "keys": [
+          "space"
+        ]
+      }
+    }
+  ]
+}

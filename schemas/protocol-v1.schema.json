@@ -51,7 +51,8 @@
             "slideshow",
             "block_break",
             "pygame_scene",
-            "ni_stim"
+            "ni_stim",
+            "neuroconn_gvs"
           ]
         },
         "engine": { "enum": ["qt", "pygame", "psychopy", "python"] },
