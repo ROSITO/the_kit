@@ -5,11 +5,17 @@ from __future__ import annotations
 import platform
 from typing import Any
 
-import sounddevice as sd
+
+def _sd():
+    """Import sounddevice à la demande (évite crash si lib PortAudio absente)."""
+    import sounddevice as sd
+
+    return sd
 
 
 def get_hostapi_name(host_idx: int) -> str:
     try:
+        sd = _sd()
         hostapis = sd.query_hostapis()
         if 0 <= host_idx < len(hostapis):
             return str(hostapis[host_idx].get("name", "unknown"))
@@ -19,6 +25,7 @@ def get_hostapi_name(host_idx: int) -> str:
 
 
 def choose_device_os_aware(cfg: dict[str, Any]) -> tuple[int | None, str]:
+    sd = _sd()
     idx = cfg.get("audio_device_index")
     if idx is not None:
         chosen = int(idx)
@@ -66,7 +73,9 @@ def choose_device_os_aware(cfg: dict[str, Any]) -> tuple[int | None, str]:
                         return i, hname
 
     try:
-        default_out = sd.default.device[1] if isinstance(sd.default.device, (list, tuple)) else None
+        default_out = (
+            sd.default.device[1] if isinstance(sd.default.device, (list, tuple)) else None
+        )
         if default_out is not None and int(default_out) >= 0:
             dev = sd.query_devices(int(default_out))
             return int(default_out), get_hostapi_name(int(dev.get("hostapi", -1)))

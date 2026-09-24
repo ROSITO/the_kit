@@ -8,14 +8,21 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-import sounddevice as sd
 import soundfile as sf
 
 from the_kit.audio.device_select import choose_device_os_aware, get_hostapi_name
 
 
+def _sd():
+    """Import sounddevice à la demande (PortAudio système peut être absent)."""
+    import sounddevice as sd
+
+    return sd
+
+
 def query_default_output_samplerate(device_index: int | None) -> int | None:
     try:
+        sd = _sd()
         if device_index is not None:
             info = sd.query_devices(int(device_index), "output")
         else:
@@ -98,7 +105,7 @@ class LowLatencyPlayer:
     def __init__(self, blocksize: int = 128, device_index: int | None = None):
         self.blocksize = int(blocksize)
         self.device_index = device_index
-        self.stream: sd.OutputStream | None = None
+        self.stream: Any | None = None
         self.sample_rate: int | None = None
         self.channels: int | None = None
         self.state: dict[str, Any] | None = None
@@ -151,6 +158,7 @@ class LowLatencyPlayer:
         self.stop()
         self.sample_rate = int(sample_rate)
         self.channels = int(channels)
+        sd = _sd()
         self.stream = sd.OutputStream(
             samplerate=self.sample_rate,
             channels=self.channels,
@@ -187,6 +195,7 @@ class LowLatencyPlayer:
 
 
 def list_output_devices() -> list[dict[str, Any]]:
+    sd = _sd()
     devices = sd.query_devices()
     hostapis = sd.query_hostapis()
     out: list[dict[str, Any]] = []

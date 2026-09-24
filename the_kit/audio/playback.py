@@ -17,7 +17,8 @@ def is_portaudio_available() -> bool:
         import sounddevice  # noqa: F401
 
         return True
-    except ImportError:
+    except (ImportError, OSError):
+        # OSError: lib PortAudio absente (souvent Linux CI sans libportaudio2)
         return False
 
 
